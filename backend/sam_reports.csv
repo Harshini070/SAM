@@ -1,0 +1,2 @@
+Timestamp,Child ID,Name,Age,Gender,Height,Weight,BMI,Category,Risk,Confidence,WHO Z-Score,Recommendation
+2026-05-08 16:15:27,SAM-001,John Doe,24,Male,85.2,11.5,15.84,Moderate Malnutrition,Moderate Risk,94.2%,-2 SD to -3 SD,Provide supplementary nutrition and monitor growth regularly.
