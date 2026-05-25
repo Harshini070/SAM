@@ -14,6 +14,9 @@ import { NRCCentersScreen } from '../screens/NRCCentersScreen';
 import { FundManagementScreen } from '../screens/FundManagementScreen';
 import { ReportsScreen } from '../screens/ReportsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { ChildDetailScreen } from '../screens/ChildDetailScreen';
+import { NotificationCenterScreen } from '../screens/NotificationCenterScreen';
+import { NRCCenterDetailScreen } from '../screens/NRCCenterDetailScreen';
 import { OfflineIndicator } from '../components/OfflineIndicator';
 import { Colors } from '../theme/colors';
 import { Spacing } from '../theme/spacing';
@@ -79,6 +82,9 @@ export const AppNavigator: React.FC = () => {
         <Stack.Screen name="MainTabs" component={MainTabs} />
         <Stack.Screen name="ChildRegistration" component={ChildRegistrationScreen} />
         <Stack.Screen name="Reports" component={ReportsScreen} />
+        <Stack.Screen name="ChildDetail" component={ChildDetailScreen} />
+        <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
+        <Stack.Screen name="NRCCenterDetail" component={NRCCenterDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
