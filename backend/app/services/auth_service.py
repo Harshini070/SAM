@@ -74,7 +74,6 @@ class AuthService:
                 "name": f"Parent_{phone}",
                 "district": None,
                 "center_id": None,
-                "email": None,
                 "is_active": True,
                 "created_at": datetime.utcnow()
             }

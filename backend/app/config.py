@@ -3,7 +3,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     
-    mongodb_url: str = "mongodb+srv://nrcadmin:nrc123@nrc-cluster.xhg4k1a.mongodb.net/nrc_db?retryWrites=true&w=majority&appName=nrc-cluster"
+    mongodb_url: str = "mongodb+srv://nrcadmin:nrc123@nrc-cluster.xhg4k1a.mongodb.net/nrc_db?retryWrites=true&w=majority"
     database_name: str = "nrc_db"
     
     # JWT
