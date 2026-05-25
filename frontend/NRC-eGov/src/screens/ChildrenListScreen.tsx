@@ -132,7 +132,11 @@ export const ChildrenListScreen: React.FC = () => {
             <Text style={styles.noData}>No children found</Text>
           ) : (
             filtered.map((child) => (
-              <TouchableOpacity key={child.child_id} style={styles.childCard}>
+              <TouchableOpacity
+                key={child.child_id}
+                style={styles.childCard}
+                onPress={() => navigation.navigate('ChildDetail', { childId: child.child_id })}
+              >
                 <View style={styles.cardTop}>
                   <View style={[styles.childAvatar, { backgroundColor: STATUS_COLORS[child.health_status || 'Healthy'] + '18' }]}>
                     <Text style={[styles.childInitial, { color: STATUS_COLORS[child.health_status || 'Healthy'] }]}>
@@ -159,10 +163,10 @@ export const ChildrenListScreen: React.FC = () => {
                       <Text style={styles.metaLabel}>{m.label}</Text>
                     </View>
                   ))}
-                  <TouchableOpacity style={styles.viewBtn}>
+                  <View style={styles.viewBtn}>
                     <Text style={styles.viewBtnText}>View Profile</Text>
                     <Ionicons name="chevron-forward" size={12} color={Colors.primary} />
-                  </TouchableOpacity>
+                  </View>
                 </View>
               </TouchableOpacity>
             ))
