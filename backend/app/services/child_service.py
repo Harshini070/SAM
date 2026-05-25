@@ -22,6 +22,16 @@ class ChildService:
             data["height"],
             age_months
         )
+        # Auto assign NRC for SAM children
+        nrc_assigned = None
+
+        if prediction["status"] == "sam":
+            nrc = await self.db.nrc_centers.find_one(
+                {"district": data["district"]}
+            )
+
+            if nrc:
+                nrc_assigned = nrc["nrc_id"]
 
         next_followup = (
             datetime.utcnow() + timedelta(days=30)
@@ -47,7 +57,8 @@ class ChildService:
             "last_screening_date": datetime.utcnow(),
             "next_followup_date": next_followup,
 
-            "nrc_assigned": None,
+            "nrc_assigned": nrc_assigned,
+            
 
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow()
