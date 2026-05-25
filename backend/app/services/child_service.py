@@ -9,9 +9,26 @@ class ChildService:
         self.db = get_db()
 
     async def register_child(self, data: dict) -> dict:
-        """Register a new child"""
         child_id = generate_child_id()
-        
+
+    # Calculate age in months
+        age_months = (
+            (datetime.utcnow().year - data["dob"].year) * 12 +
+            (datetime.utcnow().month - data["dob"].month)
+            )
+
+        prediction = predict_health_status(
+            data["weight"],
+            data["height"],
+            age_months
+        )
+
+        next_followup = (
+            datetime.utcnow() + timedelta(days=30)
+            if prediction["status"] == "healthy"
+            else datetime.utcnow() + timedelta(days=15)
+        )
+
         child_doc = {
             "child_id": child_id,
             "name": data["name"],
@@ -21,19 +38,24 @@ class ChildService:
             "mother_phone": data["mother_phone"],
             "village": data["village"],
             "district": data["district"],
-            "weight": data.get("weight"),
-            "height": data.get("height"),
-            "muac": data.get("muac"),
-            "health_status": "unknown",
+
+            "weight": data["weight"],
+            "height": data["height"],
+            "muac": data["muac"],
+
+            "health_status": prediction["status"],
+            "last_screening_date": datetime.utcnow(),
+            "next_followup_date": next_followup,
+
             "nrc_assigned": None,
-            "last_screening_date": None,
-            "next_followup_date": None,
+
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow()
         }
-        
+
         result = await self.db.children.insert_one(child_doc)
         child_doc["_id"] = str(result.inserted_id)
+
         return child_doc
 
     async def screen_child(self, child_id: str, weight: float, height: float, muac: float, age_months: int) -> dict:
