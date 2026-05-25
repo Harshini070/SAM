@@ -4,6 +4,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
 import { HeaderBar } from '../components/HeaderBar';
 import { Colors } from '../theme/colors';
 import { Spacing, Radius } from '../theme/spacing';
@@ -26,6 +29,7 @@ interface NRCCenter {
 
 export const NRCCentersScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [centers, setCenters] = useState<NRCCenter[]>([]);
   const [district, setDistrict] = useState('All Districts');
   const [search, setSearch] = useState('');
@@ -124,7 +128,11 @@ export const NRCCentersScreen: React.FC = () => {
               const occPct = Math.round((center.occupied_beds / center.total_beds) * 100);
               const occColor = occPct > 85 ? Colors.error : occPct > 60 ? '#D97706' : Colors.success;
               return (
-                <TouchableOpacity key={center.nrc_id} style={styles.centerCard}>
+                <TouchableOpacity
+                  key={center.nrc_id}
+                  style={styles.centerCard}
+                  onPress={() => navigation.navigate('NRCCenterDetail', { centerId: center.nrc_id })}
+                >
                   <View style={styles.cardHeader}>
                     <View style={[styles.centerIcon, { backgroundColor: Colors.primary + '12' }]}>
                       <Ionicons name="business-outline" size={20} color={Colors.primary} />
@@ -149,16 +157,16 @@ export const NRCCentersScreen: React.FC = () => {
                   <View style={styles.centerMeta}>
                     <View style={styles.metaItem}>
                       <Ionicons name="person-outline" size={12} color={Colors.textMuted} />
-                      <Text style={styles.metaText}>{center.address}</Text>
+                      <Text style={styles.metaText}>{center.address.split(',')[0]}</Text>
                     </View>
                     <View style={styles.metaItem}>
                       <Ionicons name="people-outline" size={12} color={Colors.textMuted} />
                       <Text style={styles.metaText}>{center.staff_count} Staff</Text>
                     </View>
-                    <TouchableOpacity style={styles.detailBtn}>
+                    <View style={styles.detailBtn}>
                       <Text style={styles.detailBtnText}>Details</Text>
                       <Ionicons name="chevron-forward" size={11} color={Colors.primary} />
-                    </TouchableOpacity>
+                    </View>
                   </View>
                 </TouchableOpacity>
               );
