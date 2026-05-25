@@ -18,13 +18,13 @@ import { analyticsService } from '../services/analyticsService';
 
 const QUICK_ACTIONS = [
   { label: 'Add Child', icon: 'person-add-outline', color: Colors.primary, screen: 'ChildRegistration' },
-  { label: 'Register NRC', icon: 'business-outline', color: '#7C3AED', screen: null },
-  { label: 'Fund Report', icon: 'bar-chart-outline', color: '#D97706', screen: null },
+  { label: 'Register NRC', icon: 'business-outline', color: '#7C3AED', screen: 'NRCCenters' },
+  { label: 'Fund Report', icon: 'bar-chart-outline', color: '#D97706', screen: 'Funds' },
   { label: 'Analytics', icon: 'analytics-outline', color: Colors.success, screen: 'Reports' },
-  { label: 'Beneficiaries', icon: 'people-circle-outline', color: '#0891B2', screen: null },
-  { label: 'Discharge', icon: 'exit-outline', color: '#E05C1A', screen: null },
-  { label: 'MUAC Scan', icon: 'scan-outline', color: '#DB2777', screen: null },
-  { label: 'Alerts', icon: 'warning-outline', color: Colors.error, screen: null },
+  { label: 'Beneficiaries', icon: 'people-circle-outline', color: '#0891B2', screen: 'Children' },
+  { label: 'Discharge', icon: 'exit-outline', color: '#E05C1A', screen: 'Children' },
+  { label: 'MUAC Scan', icon: 'scan-outline', color: '#DB2777', screen: 'ChildRegistration' },
+  { label: 'Alerts', icon: 'warning-outline', color: Colors.error, screen: 'Notifications' },
 ];
 
 const ALERTS = [
@@ -37,6 +37,10 @@ const ALERTS = [
 interface DashboardData {
   total_children?: number;
   sam_children?: number;
+  mam_children?: number;
+  healthy_children?: number;
+  pending_followups?: number;
+  nrc_occupancy_pct?: number;
   recovered_children?: number;
   active_nrc_centers?: number;
   recovery_rate?: number;
@@ -75,10 +79,12 @@ export const DashboardScreen: React.FC = () => {
   };
 
   const stats = [
-    { label: 'Total SAM Children', value: dashboardData?.sam_children || '0', icon: 'people', color: Colors.primary },
-    { label: 'Recovered', value: dashboardData?.recovered_children || '0', icon: 'heart', color: Colors.success },
-    { label: 'Active NRCs', value: dashboardData?.active_nrc_centers || '0', icon: 'business', color: '#7C3AED' },
-    { label: 'Recovery Rate', value: `${dashboardData?.recovery_rate || 0}%`, icon: 'trending-up', color: '#D97706' },
+    { label: 'Total Children', value: dashboardData?.total_children || '0', icon: 'people-outline', color: Colors.primary },
+    { label: 'SAM Count', value: dashboardData?.sam_children || '0', icon: 'alert-circle-outline', color: Colors.error },
+    { label: 'MAM Count', value: dashboardData?.mam_children || '0', icon: 'warning-outline', color: '#D97706' },
+    { label: 'Healthy Count', value: dashboardData?.healthy_children || '0', icon: 'checkmark-circle-outline', color: Colors.success },
+    { label: 'Pending Followups', value: dashboardData?.pending_followups || '0', icon: 'calendar-outline', color: '#7C3AED' },
+    { label: 'NRC Occupancy', value: `${dashboardData?.nrc_occupancy_pct || 0}%`, icon: 'bed-outline', color: '#0891B2' },
   ];
 
   const districts = (dashboardData?.district_stats || []).map((d, i) => ({
@@ -139,7 +145,15 @@ export const DashboardScreen: React.FC = () => {
           <View style={styles.actionsGrid}>
             {QUICK_ACTIONS.map((a) => (
               <TouchableOpacity key={a.label} style={styles.actionItem}
-                onPress={() => { if (a.screen) navigation.navigate(a.screen as any); }}>
+                onPress={() => {
+                  if (a.screen) {
+                    if (['NRCCenters', 'Funds', 'Children'].includes(a.screen)) {
+                      navigation.navigate('MainTabs', { screen: a.screen } as any);
+                    } else {
+                      navigation.navigate(a.screen as any);
+                    }
+                  }
+                }}>
                 <View style={[styles.actionIcon, { backgroundColor: a.color + '15' }]}>
                   <Ionicons name={a.icon as any} size={22} color={a.color} />
                 </View>
