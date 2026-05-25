@@ -2,8 +2,8 @@ from pydantic_settings import BaseSettings
 from typing import Optional
 
 class Settings(BaseSettings):
-    # MongoDB
-    mongodb_url: str = "mongodb+srv://nrcadmin:nrc123@nrc-cluster.xhg4k1a.mongodb.net/?appName=nrc-cluster"
+    
+    mongodb_url: str = "mongodb+srv://nrcadmin:nrc123@nrc-cluster.xhg4k1a.mongodb.net/nrc_db?retryWrites=true&w=majority&appName=nrc-cluster"
     database_name: str = "nrc_db"
     
     # JWT
