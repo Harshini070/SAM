@@ -1,0 +1,212 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, RefreshControl,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { HeaderBar } from '../components/HeaderBar';
+import { Colors } from '../theme/colors';
+import { Spacing, Radius } from '../theme/spacing';
+import { nrcService } from '../services/nrcService';
+
+const DISTRICTS = ['All Districts', 'Raipur', 'Durg', 'Bastar', 'Bilaspur', 'Rajnandgaon'];
+
+interface NRCCenter {
+  nrc_id: string;
+  name: string;
+  district: string;
+  address: string;
+  phone: string;
+  total_beds: number;
+  occupied_beds: number;
+  staff_count: number;
+  latitude?: number;
+  longitude?: number;
+}
+
+export const NRCCentersScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
+  const [centers, setCenters] = useState<NRCCenter[]>([]);
+  const [district, setDistrict] = useState('All Districts');
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchCenters = async () => {
+    try {
+      const data = await nrcService.getAllCenters(district !== 'All Districts' ? district : undefined);
+      setCenters(data);
+    } catch (err) {
+      console.error('Failed to fetch NRC centers:', err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCenters();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchCenters();
+  };
+
+  const handleDistrictChange = (d: string) => {
+    setDistrict(d);
+    setLoading(true);
+  };
+
+  const filtered = centers.filter((c) =>
+    (district === 'All Districts' || c.district === district) &&
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalBeds = centers.reduce((s, c) => s + c.total_beds, 0);
+  const totalOcc = centers.reduce((s, c) => s + c.occupied_beds, 0);
+
+  return (
+    <View style={[styles.flex, { paddingBottom: insets.bottom }]}>
+      <HeaderBar title="NRC Centers" subtitle={`${centers.length} Centers · Chhattisgarh`} />
+
+      {/* Summary */}
+      <View style={styles.summaryRow}>
+        {[
+          { label: 'Total Centers', val: centers.length.toString(), icon: 'business', color: Colors.primary },
+          { label: 'Bed Capacity', val: totalBeds.toString(), icon: 'bed', color: '#7C3AED' },
+          { label: 'Occupied', val: totalOcc.toString(), icon: 'people', color: Colors.error },
+          { label: 'Occupancy', val: `${totalBeds > 0 ? Math.round((totalOcc / totalBeds) * 100) : 0}%`, icon: 'analytics', color: Colors.success },
+        ].map((s) => (
+          <View key={s.label} style={styles.summaryCard}>
+            <Ionicons name={s.icon as any} size={16} color={s.color} />
+            <Text style={[styles.summaryVal, { color: s.color }]}>{s.val}</Text>
+            <Text style={styles.summaryLabel}>{s.label}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Search */}
+      <View style={styles.searchWrap}>
+        <View style={styles.searchBox}>
+          <Ionicons name="search-outline" size={15} color={Colors.textMuted} />
+          <TextInput style={styles.searchInput} placeholder="Search NRC centers…"
+            placeholderTextColor={Colors.textMuted} value={search} onChangeText={setSearch} />
+        </View>
+      </View>
+
+      {/* District Filter */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}
+        style={styles.filterScroll} contentContainerStyle={styles.filterRow}>
+        {DISTRICTS.map((d) => (
+          <TouchableOpacity key={d} style={[styles.chip, district === d && styles.chipActive]} onPress={() => handleDistrictChange(d)}>
+            <Text style={[styles.chipText, district === d && styles.chipTextActive]}>{d}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {loading ? (
+        <View style={styles.centerLoader}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading NRC centers...</Text>
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+          {filtered.length === 0 ? (
+            <Text style={styles.noData}>No NRC centers found</Text>
+          ) : (
+            filtered.map((center) => {
+              const occPct = Math.round((center.occupied_beds / center.total_beds) * 100);
+              const occColor = occPct > 85 ? Colors.error : occPct > 60 ? '#D97706' : Colors.success;
+              return (
+                <TouchableOpacity key={center.nrc_id} style={styles.centerCard}>
+                  <View style={styles.cardHeader}>
+                    <View style={[styles.centerIcon, { backgroundColor: Colors.primary + '12' }]}>
+                      <Ionicons name="business-outline" size={20} color={Colors.primary} />
+                    </View>
+                    <View style={styles.centerInfo}>
+                      <Text style={styles.centerName}>{center.name}</Text>
+                      <Text style={styles.centerDistrict}>{center.district} District</Text>
+                    </View>
+                    <View style={[styles.statusPill, { backgroundColor: Colors.success + '15' }]}>
+                      <View style={[styles.statusDot, { backgroundColor: Colors.success }]} />
+                      <Text style={[styles.statusText, { color: Colors.success }]}>Active</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.bedRow}>
+                    <Text style={styles.bedLabel}>Bed Occupancy</Text>
+                    <Text style={[styles.bedPct, { color: occColor }]}>{center.occupied_beds}/{center.total_beds} beds ({occPct}%)</Text>
+                  </View>
+                  <View style={styles.bedTrack}>
+                    <View style={[styles.bedFill, { width: `${occPct}%`, backgroundColor: occColor }]} />
+                  </View>
+                  <View style={styles.centerMeta}>
+                    <View style={styles.metaItem}>
+                      <Ionicons name="person-outline" size={12} color={Colors.textMuted} />
+                      <Text style={styles.metaText}>{center.address}</Text>
+                    </View>
+                    <View style={styles.metaItem}>
+                      <Ionicons name="people-outline" size={12} color={Colors.textMuted} />
+                      <Text style={styles.metaText}>{center.staff_count} Staff</Text>
+                    </View>
+                    <TouchableOpacity style={styles.detailBtn}>
+                      <Text style={styles.detailBtnText}>Details</Text>
+                      <Ionicons name="chevron-forward" size={11} color={Colors.primary} />
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </ScrollView>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  flex: { flex: 1, backgroundColor: '#EEF2F7' },
+  summaryRow: { flexDirection: 'row', backgroundColor: Colors.white, paddingHorizontal: 12, paddingVertical: 12, gap: 8, borderBottomWidth: 1, borderBottomColor: '#E5EAF2' },
+  summaryCard: { flex: 1, alignItems: 'center', gap: 3 },
+  summaryVal: { fontSize: 16, fontWeight: '800' },
+  summaryLabel: { fontSize: 9, color: Colors.textMuted, textAlign: 'center', fontWeight: '500' },
+  searchWrap: { backgroundColor: Colors.white, paddingHorizontal: 16, paddingVertical: 10 },
+  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EEF2F7', borderRadius: 24, paddingHorizontal: 12, paddingVertical: 8, gap: 8 },
+  searchInput: { flex: 1, fontSize: 13, color: Colors.textPrimary },
+  filterScroll: { backgroundColor: Colors.white, flexGrow: 0, borderBottomWidth: 1, borderBottomColor: '#E5EAF2' },
+  filterRow: { paddingHorizontal: 16, paddingBottom: 12, paddingTop: 4, gap: 8 },
+  chip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: '#EEF2F7', borderWidth: 1, borderColor: '#DDE3ED' },
+  chipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  chipText: { fontSize: 11, fontWeight: '600', color: Colors.textSecondary },
+  chipTextActive: { color: Colors.white },
+  centerLoader: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  loadingText: { fontSize: 12, color: Colors.textMuted, marginTop: 12 },
+  noData: { fontSize: 12, color: Colors.textMuted, textAlign: 'center', marginTop: 24 },
+  scroll: { flex: 1 },
+  list: { padding: 16, gap: 12, paddingBottom: 32 },
+  centerCard: { backgroundColor: Colors.white, borderRadius: 14, padding: 14, shadowColor: 'rgba(0,43,91,0.08)', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 2 },
+  cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
+  centerIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
+  centerInfo: { flex: 1 },
+  centerName: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
+  centerDistrict: { fontSize: 11, color: Colors.textSecondary, marginTop: 2 },
+  statusPill: { flexDirection: 'row', alignItems: 'center', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, gap: 5 },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  statusText: { fontSize: 10, fontWeight: '700' },
+  bedRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  bedLabel: { fontSize: 11, color: Colors.textSecondary, fontWeight: '500' },
+  bedPct: { fontSize: 11, fontWeight: '700' },
+  bedTrack: { height: 6, backgroundColor: '#EEF2F7', borderRadius: 3, overflow: 'hidden', marginBottom: 12 },
+  bedFill: { height: '100%', borderRadius: 3 },
+  centerMeta: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#EEF2F7' },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaText: { fontSize: 11, color: Colors.textSecondary },
+  detailBtn: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 2 },
+  detailBtnText: { fontSize: 11, color: Colors.primary, fontWeight: '600' },
+});

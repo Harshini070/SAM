@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: chhattisgarh_nutrition_mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: chhattisgarh_nutrition
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - nutrition_network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build: .
+    container_name: chhattisgarh_nutrition_backend
+    ports:
+      - "8000:8000"
+    environment:
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/chhattisgarh_nutrition
+      DATABASE_NAME: chhattisgarh_nutrition
+      SECRET_KEY: your-super-secret-key-change-in-production
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      ENVIRONMENT: development
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+      - ./main.py:/app/main.py
+    networks:
+      - nutrition_network
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Mongo Express (optional - for database visualization)
+  mongo_express:
+    image: mongo-express:latest
+    container_name: chhattisgarh_nutrition_mongo_express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password123
+      ME_CONFIG_MONGODB_URL: mongodb://admin:password123@mongodb:27017/
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - mongodb
+    networks:
+      - nutrition_network
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+
+networks:
+  nutrition_network:
+    driver: bridge
+
+# Usage:
+# docker-compose up -d          # Start all services
+# docker-compose down           # Stop all services
+# docker-compose logs -f        # View logs
+# docker-compose logs -f backend # View backend logs only
+#
+# Access:
+# Backend API: http://localhost:8000
+# API Docs: http://localhost:8000/docs
+# Mongo Express: http://localhost:8081
+# MongoDB: mongodb://admin:password123@localhost:27017
