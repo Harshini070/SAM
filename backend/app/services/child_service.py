@@ -33,6 +33,21 @@ class ChildService:
             if nrc:
                 nrc_assigned = nrc["nrc_id"]
 
+                # Create alert
+                alert_doc = {
+                    "recipient_phone": data["mother_phone"],
+                    "alert_type": "SAM_ALERT",
+
+                    "message":
+                        f"Child {data['name']} identified as SAM and assigned to {nrc['name']}",
+
+                    "status": "pending",
+
+                    "created_at": datetime.utcnow()
+                }
+
+                await self.db.alerts.insert_one(alert_doc)
+    
         next_followup = (
             datetime.utcnow() + timedelta(days=30)
             if prediction["status"] == "healthy"
