@@ -1,6 +1,10 @@
 export type RootStackParamList = {
   Splash: undefined;
+  Landing: undefined;
   Login: undefined;
+  Register: undefined;
+  OTPVerification: { flow: 'login' | 'register'; phone?: string };
+  FullRegistration: { phone?: string } | undefined;
   MainTabs: undefined;
   ChildRegistration: undefined;
   ChildDetail: { childId: string };

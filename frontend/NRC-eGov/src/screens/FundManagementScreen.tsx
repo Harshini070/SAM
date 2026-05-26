@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { HeaderBar } from '../components/HeaderBar';
 import { Colors } from '../theme/colors';
 import { Spacing, Radius } from '../theme/spacing';
@@ -101,7 +102,12 @@ export const FundManagementScreen: React.FC = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {/* Core Summary Card */}
-          <View style={styles.overviewCard}>
+          <LinearGradient
+            colors={[Colors.primary, Colors.primaryLight]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.overviewCard}
+          >
             <Text style={styles.overviewTitle}>Total Budget Status</Text>
             <View style={styles.amtRow}>
               <View>
@@ -121,7 +127,7 @@ export const FundManagementScreen: React.FC = () => {
             <View style={styles.track}>
               <View style={[styles.fill, { width: `${utilizationPct}%`, backgroundColor: Colors.success }]} />
             </View>
-          </View>
+          </LinearGradient>
 
           {/* Categories breakdown */}
           <Text style={styles.sectionTitle}>Expenditure by Category</Text>
@@ -175,39 +181,39 @@ export const FundManagementScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#EEF2F7' },
+  flex: { flex: 1, backgroundColor: Colors.background },
   centerLoader: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  loadingText: { fontSize: 12, color: Colors.textMuted, marginTop: 12 },
+  loadingText: { fontSize: 12, color: Colors.textMuted, marginTop: 12, fontWeight: '600' },
   noData: { fontSize: 12, color: Colors.textMuted, textAlign: 'center', marginTop: 24 },
   scroll: { flex: 1 },
   list: { padding: 16, gap: 12, paddingBottom: 32 },
-  overviewCard: { backgroundColor: Colors.primary, borderRadius: 16, padding: 18, shadowColor: 'rgba(0,43,91,0.25)', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 10, elevation: 4, marginBottom: 12 },
-  overviewTitle: { fontSize: 13, color: 'rgba(255,255,255,0.7)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  overviewCard: { borderRadius: 16, padding: 18, shadowColor: Colors.primary, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.15, shadowRadius: 20, elevation: 6, marginBottom: 12 },
+  overviewTitle: { fontSize: 13, color: 'rgba(255,255,255,0.7)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
   amtRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, marginBottom: 18 },
-  amtLabel: { fontSize: 11, color: 'rgba(255,255,255,0.65)' },
+  amtLabel: { fontSize: 11, color: 'rgba(255,255,255,0.65)', fontWeight: '600' },
   amtValue: { fontSize: 22, fontWeight: '800', color: Colors.white, marginTop: 2 },
   verticalDivider: { width: 1, height: 40, backgroundColor: 'rgba(255,255,255,0.2)' },
   progressHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
-  progressLabel: { fontSize: 12, color: 'rgba(255,255,255,0.85)', fontWeight: '500' },
+  progressLabel: { fontSize: 12, color: 'rgba(255,255,255,0.85)', fontWeight: '600' },
   progressValue: { fontSize: 12, color: Colors.white, fontWeight: '700' },
-  track: { height: 6, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 3, overflow: 'hidden' },
+  track: { height: 6, backgroundColor: 'rgba(255,255,255,0.25)', borderRadius: 3, overflow: 'hidden' },
   fill: { height: '100%', borderRadius: 3 },
   sectionTitle: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary, marginBottom: 6, marginTop: 6 },
-  card: { backgroundColor: Colors.white, borderRadius: 14, padding: 14, shadowColor: 'rgba(0,43,91,0.08)', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 2 },
+  card: { backgroundColor: Colors.white, borderRadius: 14, padding: 14, shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 12 }, shadowOpacity: 1, shadowRadius: 24, elevation: 2, borderWidth: 1, borderColor: '#E5E7EB' },
   catRow: { marginBottom: 12 },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: '#EEF2F7', paddingBottom: 12 },
+  rowBorder: { borderBottomWidth: 1, borderBottomColor: '#F3F4F6', paddingBottom: 12 },
   catHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
   catIconWrap: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   catLabel: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 },
-  seeAll: { fontSize: 12, color: Colors.primaryLight, fontWeight: '600' },
+  seeAll: { fontSize: 12, color: Colors.primary, fontWeight: '700' },
   transRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
   transLeft: { flex: 1, gap: 3 },
   transCenter: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary },
-  transDesc: { fontSize: 12, color: Colors.textSecondary },
-  transDate: { fontSize: 10, color: Colors.textMuted },
+  transDesc: { fontSize: 12, color: Colors.textSecondary, fontWeight: '500' },
+  transDate: { fontSize: 10, color: Colors.textMuted, fontWeight: '500' },
   transRight: { alignItems: 'flex-end', gap: 6 },
   transAmt: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12 },
-  statusText: { fontSize: 9, fontWeight: '700' },
+  statusText: { fontSize: 9, fontWeight: '800' },
 });

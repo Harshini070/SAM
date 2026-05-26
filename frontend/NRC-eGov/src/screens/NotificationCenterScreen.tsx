@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: '#F3F4F6',
   },
   tab: {
     flex: 1,
@@ -257,11 +257,11 @@ const styles = StyleSheet.create({
   tabText: {
     ...Typography.caption,
     color: Colors.textSecondary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   tabTextActive: {
     color: Colors.primary,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   quickActionsRow: {
     flexDirection: 'row',
@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#EEF2F7',
+    borderBottomColor: '#F3F4F6',
   },
   quickActionBtn: {
     flexDirection: 'row',
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
   quickActionText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.primary,
   },
   scroll: { flex: 1 },
@@ -292,11 +292,16 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     position: 'relative',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E5E7EB',
+    shadowColor: Colors.shadow,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    elevation: 2,
   },
   unreadCard: {
-    borderColor: Colors.primary + '30',
-    backgroundColor: '#F8FAFC',
+    borderColor: Colors.success + '20',
+    backgroundColor: '#F0FDFA',
   },
   iconBadge: {
     width: 38,

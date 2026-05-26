@@ -38,6 +38,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const textColor = light ? Colors.white : Colors.textPrimary;
+  const buttonBg = light ? 'rgba(255,255,255,0.16)' : 'rgba(10, 25, 49, 0.05)';
 
   return (
     <View
@@ -55,7 +56,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       />
       <View style={styles.row}>
         {showBack && (
-          <TouchableOpacity style={styles.iconBtn} onPress={onBack}>
+          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: buttonBg }]} onPress={onBack}>
             <Ionicons
               name="chevron-back"
               size={22}
@@ -64,15 +65,15 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           </TouchableOpacity>
         )}
         <View style={styles.titleBlock}>
-          <Text style={[Typography.h3, { color: textColor }]}>{title}</Text>
+          <Text style={[Typography.h3, { color: textColor, fontWeight: '700' }]}>{title}</Text>
           {subtitle && (
-            <Text style={[Typography.caption, { color: light ? 'rgba(255,255,255,0.75)' : Colors.textSecondary }]}>
+            <Text style={[Typography.caption, { color: light ? 'rgba(255,255,255,0.75)' : Colors.textSecondary, fontWeight: '500' }]}>
               {subtitle}
             </Text>
           )}
         </View>
         {rightIcon && (
-          <TouchableOpacity style={styles.iconBtn} onPress={onRightPress}>
+          <TouchableOpacity style={[styles.iconBtn, { backgroundColor: buttonBg }]} onPress={onRightPress}>
             <Ionicons
               name={rightIcon}
               size={22}
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingBottom: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: '#F1F5F9',
   },
   lightBg: {
     backgroundColor: Colors.primary,

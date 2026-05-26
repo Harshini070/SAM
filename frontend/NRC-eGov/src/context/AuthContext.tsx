@@ -7,7 +7,7 @@ export const AuthContext = createContext<any>(null);
 export const AuthProvider = ({ children }: any) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [userPhone, setUserPhone] = useState(null);
+  const [userPhone, setUserPhone] = useState<string | null>(null);
 
   // Check if user is already logged in on app start
   useEffect(() => {
