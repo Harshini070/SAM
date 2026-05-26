@@ -214,6 +214,7 @@ export const ReportsScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: Colors.background },
+<<<<<<< HEAD
   tabBar: { flexDirection: 'row', backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
   tab: { flex: 1, paddingVertical: Spacing.md, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
   tabActive: { borderBottomColor: Colors.primary },
@@ -229,11 +230,29 @@ const styles = StyleSheet.create({
   kpiCard: { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, flex: 1, minWidth: '45%', shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2, borderWidth: 1, borderColor: '#E5E7EB' },
   kpiValue: { ...Typography.h3, color: Colors.primary, marginBottom: 2, fontWeight: '800' },
   kpiLabel: { ...Typography.caption, color: Colors.textSecondary, marginBottom: Spacing.xs, fontWeight: '600' },
+=======
+  tabBar: { flexDirection: 'row', backgroundColor: Colors.white, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  tab: { flex: 1, paddingVertical: Spacing.md, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
+  tabActive: { borderBottomColor: Colors.primary },
+  tabText: { ...Typography.caption, color: Colors.textSecondary },
+  tabTextActive: { color: Colors.primary, fontWeight: '700' },
+  scroll: { flex: 1 },
+  content: { padding: Spacing.md, paddingBottom: Spacing.xxl },
+  card: { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, marginBottom: Spacing.md, elevation: 2 },
+  cardTitle: { ...Typography.h4, color: Colors.textPrimary, marginBottom: 2 },
+  cardSubtitle: { ...Typography.caption, color: Colors.textSecondary, marginBottom: Spacing.md },
+  chart: { borderRadius: Radius.md, marginLeft: -Spacing.sm },
+  kpiRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.md },
+  kpiCard: { backgroundColor: Colors.white, borderRadius: Radius.lg, padding: Spacing.md, flex: 1, minWidth: '45%', elevation: 2 },
+  kpiValue: { ...Typography.h3, color: Colors.primary, marginBottom: 2 },
+  kpiLabel: { ...Typography.caption, color: Colors.textSecondary, marginBottom: Spacing.xs },
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   trendTag: { borderRadius: Radius.full, paddingHorizontal: Spacing.sm, paddingVertical: 2, alignSelf: 'flex-start' },
   trendText: { ...Typography.caption, fontWeight: '700' },
   nutRow: { marginBottom: Spacing.md },
   nutHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xs },
   nutDot: { width: 8, height: 8, borderRadius: 4, marginRight: Spacing.xs },
+<<<<<<< HEAD
   nutLabel: { ...Typography.label, color: Colors.textPrimary, flex: 1, fontWeight: '700' },
   nutPct: { ...Typography.label, fontWeight: '800' },
   nutCount: { ...Typography.caption, color: Colors.textMuted, marginTop: 4, fontWeight: '600' },
@@ -247,14 +266,38 @@ const styles = StyleSheet.create({
   distChildren: { ...Typography.caption, color: Colors.textMuted, fontWeight: '500' },
   distRight: { alignItems: 'flex-end', width: 70 },
   distPct: { ...Typography.label, fontWeight: '800', marginBottom: 4 },
+=======
+  nutLabel: { ...Typography.label, color: Colors.textPrimary, flex: 1 },
+  nutPct: { ...Typography.label, fontWeight: '700' },
+  nutCount: { ...Typography.caption, color: Colors.textMuted, marginTop: 4 },
+  track: { height: 8, backgroundColor: Colors.background, borderRadius: Radius.full, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: Radius.full },
+  distRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.sm, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  rank: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.sm },
+  rankText: { ...Typography.label, fontWeight: '700' },
+  distInfo: { flex: 1 },
+  distName: { ...Typography.label, color: Colors.textPrimary },
+  distChildren: { ...Typography.caption, color: Colors.textMuted },
+  distRight: { alignItems: 'flex-end', width: 70 },
+  distPct: { ...Typography.label, fontWeight: '700', marginBottom: 4 },
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   miniBar: { height: 4, width: 60, borderRadius: 2, overflow: 'hidden' },
   miniFill: { height: '100%', borderRadius: 2 },
   fundRow: { marginBottom: Spacing.md },
   fundTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xs },
+<<<<<<< HEAD
   fundLabel: { ...Typography.label, color: Colors.textPrimary, fontWeight: '700' },
   fundAmts: { flexDirection: 'row' },
   fundSpent: { ...Typography.label, color: Colors.primary, fontWeight: '800' },
   fundAlloc: { ...Typography.label, color: Colors.textMuted },
   fundPct: { ...Typography.caption, color: Colors.textSecondary, marginTop: 4, fontWeight: '500' },
   footerNote: { ...Typography.caption, color: Colors.textMuted, textAlign: 'center', marginTop: Spacing.sm, fontWeight: '500' },
+=======
+  fundLabel: { ...Typography.label, color: Colors.textPrimary },
+  fundAmts: { flexDirection: 'row' },
+  fundSpent: { ...Typography.label, color: Colors.primary, fontWeight: '700' },
+  fundAlloc: { ...Typography.label, color: Colors.textMuted },
+  fundPct: { ...Typography.caption, color: Colors.textSecondary, marginTop: 4 },
+  footerNote: { ...Typography.caption, color: Colors.textMuted, textAlign: 'center', marginTop: Spacing.sm },
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
 });

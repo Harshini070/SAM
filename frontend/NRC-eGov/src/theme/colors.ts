@@ -1,4 +1,5 @@
 export const Colors = {
+<<<<<<< HEAD
   primary: '#0A1931',
   primaryLight: '#15305B',
   accent: '#FF9F29',
@@ -17,4 +18,24 @@ export const Colors = {
   gradientStart: '#0A1931',
   gradientMid: '#15305B',
   gradientEnd: '#10B981',
+=======
+  primary: '#002B5B',
+  primaryLight: '#355C7D',
+  accent: '#F4A832',
+  success: '#4CAF50',
+  error: '#E53935',
+  warning: '#FF9800',
+  white: '#FFFFFF',
+  offWhite: '#F5F7FA',
+  background: '#EEF2F7',
+  border: '#DDE3ED',
+  textPrimary: '#0D1B2A',
+  textSecondary: '#6B7A8D',
+  textMuted: '#A0AABB',
+  card: '#FFFFFF',
+  shadow: 'rgba(0,43,91,0.10)',
+  gradientStart: '#1B6B3A',
+  gradientMid: '#F4A832',
+  gradientEnd: '#E05C1A',
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
 };

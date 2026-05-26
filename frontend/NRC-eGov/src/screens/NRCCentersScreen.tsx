@@ -4,9 +4,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+<<<<<<< HEAD
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+=======
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
 import { HeaderBar } from '../components/HeaderBar';
 import { Colors } from '../theme/colors';
 import { Spacing, Radius } from '../theme/spacing';
@@ -29,12 +32,16 @@ interface NRCCenter {
 
 export const NRCCentersScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
+<<<<<<< HEAD
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+=======
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   const [centers, setCenters] = useState<NRCCenter[]>([]);
   const [district, setDistrict] = useState('All Districts');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+<<<<<<< HEAD
   const [error, setError] = useState('');
 
   const fetchCenters = async (showLoader = false) => {
@@ -46,6 +53,15 @@ export const NRCCentersScreen: React.FC = () => {
     } catch (err: any) {
       console.error('Failed to fetch NRC centers:', err);
       setError(err.message || 'Failed to fetch active centers');
+=======
+
+  const fetchCenters = async () => {
+    try {
+      const data = await nrcService.getAllCenters(district !== 'All Districts' ? district : undefined);
+      setCenters(data);
+    } catch (err) {
+      console.error('Failed to fetch NRC centers:', err);
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -53,16 +69,29 @@ export const NRCCentersScreen: React.FC = () => {
   };
 
   useEffect(() => {
+<<<<<<< HEAD
     fetchCenters(true);
   }, [district]); // refetch when district changes!
 
   const onRefresh = () => {
     setRefreshing(true);
     fetchCenters(false);
+=======
+    fetchCenters();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchCenters();
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   };
 
   const handleDistrictChange = (d: string) => {
     setDistrict(d);
+<<<<<<< HEAD
+=======
+    setLoading(true);
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   };
 
   const filtered = centers.filter((c) =>
@@ -117,6 +146,7 @@ export const NRCCentersScreen: React.FC = () => {
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={styles.loadingText}>Loading NRC centers...</Text>
         </View>
+<<<<<<< HEAD
       ) : error ? (
         <View style={styles.centerLoader}>
           <Ionicons name="cloud-offline-outline" size={52} color={Colors.error} />
@@ -126,6 +156,8 @@ export const NRCCentersScreen: React.FC = () => {
             <Text style={styles.retryBtnText}>Retry</Text>
           </TouchableOpacity>
         </View>
+=======
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
       ) : (
         <ScrollView
           style={styles.scroll}
@@ -134,6 +166,7 @@ export const NRCCentersScreen: React.FC = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {filtered.length === 0 ? (
+<<<<<<< HEAD
             <View style={styles.emptyWrap}>
               <Ionicons name="business-outline" size={54} color={Colors.textMuted} />
               <Text style={styles.emptyTitle}>No Centers Found</Text>
@@ -145,16 +178,23 @@ export const NRCCentersScreen: React.FC = () => {
                   : 'No NRC centers are currently available.'}
               </Text>
             </View>
+=======
+            <Text style={styles.noData}>No NRC centers found</Text>
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
           ) : (
             filtered.map((center) => {
               const occPct = Math.round((center.occupied_beds / center.total_beds) * 100);
               const occColor = occPct > 85 ? Colors.error : occPct > 60 ? '#D97706' : Colors.success;
               return (
+<<<<<<< HEAD
                 <TouchableOpacity
                   key={center.nrc_id}
                   style={styles.centerCard}
                   onPress={() => navigation.navigate('NRCCenterDetail', { centerId: center.nrc_id })}
                 >
+=======
+                <TouchableOpacity key={center.nrc_id} style={styles.centerCard}>
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
                   <View style={styles.cardHeader}>
                     <View style={[styles.centerIcon, { backgroundColor: Colors.primary + '12' }]}>
                       <Ionicons name="business-outline" size={20} color={Colors.primary} />
@@ -179,16 +219,27 @@ export const NRCCentersScreen: React.FC = () => {
                   <View style={styles.centerMeta}>
                     <View style={styles.metaItem}>
                       <Ionicons name="person-outline" size={12} color={Colors.textMuted} />
+<<<<<<< HEAD
                       <Text style={styles.metaText}>{center.address.split(',')[0]}</Text>
+=======
+                      <Text style={styles.metaText}>{center.address}</Text>
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
                     </View>
                     <View style={styles.metaItem}>
                       <Ionicons name="people-outline" size={12} color={Colors.textMuted} />
                       <Text style={styles.metaText}>{center.staff_count} Staff</Text>
                     </View>
+<<<<<<< HEAD
                     <View style={styles.detailBtn}>
                       <Text style={styles.detailBtnText}>Details</Text>
                       <Ionicons name="chevron-forward" size={11} color={Colors.primary} />
                     </View>
+=======
+                    <TouchableOpacity style={styles.detailBtn}>
+                      <Text style={styles.detailBtnText}>Details</Text>
+                      <Ionicons name="chevron-forward" size={11} color={Colors.primary} />
+                    </TouchableOpacity>
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
                   </View>
                 </TouchableOpacity>
               );
@@ -201,6 +252,7 @@ export const NRCCentersScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+<<<<<<< HEAD
   flex: { flex: 1, backgroundColor: Colors.background },
   summaryRow: { flexDirection: 'row', backgroundColor: Colors.white, paddingHorizontal: 12, paddingVertical: 12, gap: 8, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
   summaryCard: { flex: 1, alignItems: 'center', gap: 3 },
@@ -229,10 +281,33 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   list: { padding: 16, gap: 12, paddingBottom: 32 },
   centerCard: { backgroundColor: Colors.white, borderRadius: 14, padding: 14, shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2, borderWidth: 1, borderColor: '#E5E7EB' },
+=======
+  flex: { flex: 1, backgroundColor: '#EEF2F7' },
+  summaryRow: { flexDirection: 'row', backgroundColor: Colors.white, paddingHorizontal: 12, paddingVertical: 12, gap: 8, borderBottomWidth: 1, borderBottomColor: '#E5EAF2' },
+  summaryCard: { flex: 1, alignItems: 'center', gap: 3 },
+  summaryVal: { fontSize: 16, fontWeight: '800' },
+  summaryLabel: { fontSize: 9, color: Colors.textMuted, textAlign: 'center', fontWeight: '500' },
+  searchWrap: { backgroundColor: Colors.white, paddingHorizontal: 16, paddingVertical: 10 },
+  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EEF2F7', borderRadius: 24, paddingHorizontal: 12, paddingVertical: 8, gap: 8 },
+  searchInput: { flex: 1, fontSize: 13, color: Colors.textPrimary },
+  filterScroll: { backgroundColor: Colors.white, flexGrow: 0, borderBottomWidth: 1, borderBottomColor: '#E5EAF2' },
+  filterRow: { paddingHorizontal: 16, paddingBottom: 12, paddingTop: 4, gap: 8 },
+  chip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: '#EEF2F7', borderWidth: 1, borderColor: '#DDE3ED' },
+  chipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  chipText: { fontSize: 11, fontWeight: '600', color: Colors.textSecondary },
+  chipTextActive: { color: Colors.white },
+  centerLoader: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  loadingText: { fontSize: 12, color: Colors.textMuted, marginTop: 12 },
+  noData: { fontSize: 12, color: Colors.textMuted, textAlign: 'center', marginTop: 24 },
+  scroll: { flex: 1 },
+  list: { padding: 16, gap: 12, paddingBottom: 32 },
+  centerCard: { backgroundColor: Colors.white, borderRadius: 14, padding: 14, shadowColor: 'rgba(0,43,91,0.08)', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 2 },
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
   centerIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   centerInfo: { flex: 1 },
   centerName: { fontSize: 14, fontWeight: '700', color: Colors.textPrimary },
+<<<<<<< HEAD
   centerDistrict: { fontSize: 11, color: Colors.textSecondary, marginTop: 2, fontWeight: '500' },
   statusPill: { flexDirection: 'row', alignItems: 'center', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, gap: 5 },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
@@ -247,4 +322,20 @@ const styles = StyleSheet.create({
   metaText: { fontSize: 11, color: Colors.textSecondary, fontWeight: '500' },
   detailBtn: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 2 },
   detailBtnText: { fontSize: 11, color: Colors.primary, fontWeight: '700' },
+=======
+  centerDistrict: { fontSize: 11, color: Colors.textSecondary, marginTop: 2 },
+  statusPill: { flexDirection: 'row', alignItems: 'center', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4, gap: 5 },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  statusText: { fontSize: 10, fontWeight: '700' },
+  bedRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  bedLabel: { fontSize: 11, color: Colors.textSecondary, fontWeight: '500' },
+  bedPct: { fontSize: 11, fontWeight: '700' },
+  bedTrack: { height: 6, backgroundColor: '#EEF2F7', borderRadius: 3, overflow: 'hidden', marginBottom: 12 },
+  bedFill: { height: '100%', borderRadius: 3 },
+  centerMeta: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#EEF2F7' },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaText: { fontSize: 11, color: Colors.textSecondary },
+  detailBtn: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 2 },
+  detailBtnText: { fontSize: 11, color: Colors.primary, fontWeight: '600' },
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
 });

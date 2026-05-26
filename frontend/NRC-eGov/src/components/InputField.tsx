@@ -36,7 +36,10 @@ export const InputField: React.FC<InputFieldProps> = ({
     <View style={[styles.container, containerStyle]}>
       <Text style={styles.label}>{label}</Text>
       <View
+<<<<<<< HEAD
         pointerEvents="box-none"
+=======
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
         style={[
           styles.inputRow,
           focused && styles.focused,
@@ -53,8 +56,11 @@ export const InputField: React.FC<InputFieldProps> = ({
         )}
         <TextInput
           style={styles.input}
+<<<<<<< HEAD
           editable={true}
           selectTextOnFocus={true}
+=======
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
           placeholderTextColor={Colors.textMuted}
           secureTextEntry={secureEntry && !showPassword}
           onFocus={() => setFocused(true)}
@@ -81,27 +87,46 @@ const styles = StyleSheet.create({
   label: {
     ...Typography.label,
     color: Colors.textPrimary,
+<<<<<<< HEAD
     fontWeight: '600',
+=======
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
     marginBottom: Spacing.xs,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
+<<<<<<< HEAD
     backgroundColor: '#F9FAFB',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     paddingHorizontal: Spacing.md,
     minHeight: 52,
+=======
+    backgroundColor: Colors.offWhite,
+    borderRadius: Radius.md,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    paddingHorizontal: Spacing.md,
+    minHeight: 50,
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   },
   focused: {
     borderColor: Colors.primary,
     backgroundColor: Colors.white,
     shadowColor: Colors.primary,
+<<<<<<< HEAD
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 1,
+=======
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   },
   errorBorder: { borderColor: Colors.error },
   leftIcon: { marginRight: Spacing.sm },

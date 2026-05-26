@@ -5,12 +5,17 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from './types';
+<<<<<<< HEAD
 import { LandingPage } from '../screens/LandingPage';
 import { SplashScreen } from '../screens/SplashScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { RegisterScreen } from '../screens/RegisterScreen';
 import { OTPVerificationScreen } from '../screens/OTPVerificationScreen';
 import { FullRegistrationScreen } from '../screens/FullRegistrationScreen';
+=======
+import { SplashScreen } from '../screens/SplashScreen';
+import { LoginScreen } from '../screens/LoginScreen';
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { ChildRegistrationScreen } from '../screens/ChildRegistrationScreen';
 import { ChildrenListScreen } from '../screens/ChildrenListScreen';
@@ -18,9 +23,12 @@ import { NRCCentersScreen } from '../screens/NRCCentersScreen';
 import { FundManagementScreen } from '../screens/FundManagementScreen';
 import { ReportsScreen } from '../screens/ReportsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+<<<<<<< HEAD
 import { ChildDetailScreen } from '../screens/ChildDetailScreen';
 import { NotificationCenterScreen } from '../screens/NotificationCenterScreen';
 import { NRCCenterDetailScreen } from '../screens/NRCCenterDetailScreen';
+=======
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
 import { OfflineIndicator } from '../components/OfflineIndicator';
 import { Colors } from '../theme/colors';
 import { Spacing } from '../theme/spacing';
@@ -82,6 +90,7 @@ export const AppNavigator: React.FC = () => {
         screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
       >
         <Stack.Screen name="Splash" component={SplashScreen} />
+<<<<<<< HEAD
         <Stack.Screen name="Landing" component={LandingPage} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
@@ -93,6 +102,12 @@ export const AppNavigator: React.FC = () => {
         <Stack.Screen name="ChildDetail" component={ChildDetailScreen} />
         <Stack.Screen name="Notifications" component={NotificationCenterScreen} />
         <Stack.Screen name="NRCCenterDetail" component={NRCCenterDetailScreen} />
+=======
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="MainTabs" component={MainTabs} />
+        <Stack.Screen name="ChildRegistration" component={ChildRegistrationScreen} />
+        <Stack.Screen name="Reports" component={ReportsScreen} />
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
       </Stack.Navigator>
     </NavigationContainer>
   );

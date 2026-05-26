@@ -38,7 +38,10 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const textColor = light ? Colors.white : Colors.textPrimary;
+<<<<<<< HEAD
   const buttonBg = light ? 'rgba(255,255,255,0.16)' : 'rgba(10, 25, 49, 0.05)';
+=======
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
 
   return (
     <View
@@ -56,7 +59,11 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       />
       <View style={styles.row}>
         {showBack && (
+<<<<<<< HEAD
           <TouchableOpacity style={[styles.iconBtn, { backgroundColor: buttonBg }]} onPress={onBack}>
+=======
+          <TouchableOpacity style={styles.iconBtn} onPress={onBack}>
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
             <Ionicons
               name="chevron-back"
               size={22}
@@ -65,15 +72,25 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           </TouchableOpacity>
         )}
         <View style={styles.titleBlock}>
+<<<<<<< HEAD
           <Text style={[Typography.h3, { color: textColor, fontWeight: '700' }]}>{title}</Text>
           {subtitle && (
             <Text style={[Typography.caption, { color: light ? 'rgba(255,255,255,0.75)' : Colors.textSecondary, fontWeight: '500' }]}>
+=======
+          <Text style={[Typography.h3, { color: textColor }]}>{title}</Text>
+          {subtitle && (
+            <Text style={[Typography.caption, { color: light ? 'rgba(255,255,255,0.75)' : Colors.textSecondary }]}>
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
               {subtitle}
             </Text>
           )}
         </View>
         {rightIcon && (
+<<<<<<< HEAD
           <TouchableOpacity style={[styles.iconBtn, { backgroundColor: buttonBg }]} onPress={onRightPress}>
+=======
+          <TouchableOpacity style={styles.iconBtn} onPress={onRightPress}>
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
             <Ionicons
               name={rightIcon}
               size={22}
@@ -99,7 +116,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingBottom: Spacing.md,
     borderBottomWidth: 1,
+<<<<<<< HEAD
     borderBottomColor: '#F1F5F9',
+=======
+    borderBottomColor: Colors.border,
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   },
   lightBg: {
     backgroundColor: Colors.primary,

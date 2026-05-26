@@ -73,24 +73,42 @@ export const OfflineIndicator: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
+<<<<<<< HEAD
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
+=======
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#f9fafb',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   },
   indicator: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+<<<<<<< HEAD
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 20,
+=======
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
     borderWidth: 1,
   },
   text: {
     fontSize: 12,
+<<<<<<< HEAD
     fontWeight: '700',
+=======
+    fontWeight: '600',
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
     flex: 1,
   },
   badge: {
@@ -109,10 +127,17 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
+<<<<<<< HEAD
     backgroundColor: '#F9FAFB',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E5E7EB',
+=======
+    backgroundColor: 'white',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+>>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   },
   detailsText: {
     fontSize: 12,
