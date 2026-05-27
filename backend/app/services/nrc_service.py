@@ -8,16 +8,31 @@ class NRCService:
         self.db = get_db()
 
     async def get_all_centers(self, district: Optional[str] = None) -> List[dict]:
-        """Get all NRC centers, optionally filtered by district"""
+        """Get all NRC centers"""
+
         query = {}
+
         if district:
             query["district"] = district
-        
-        return await self.db.nrc_centers.find(query).to_list(None)
 
-    async def get_center_by_id(self, nrc_id: str) -> Optional[dict]:
-        """Get NRC center by ID"""
-        return await self.db.nrc_centers.find_one({"nrc_id": nrc_id})
+        centers = await self.db.nrc_centers.find(
+            query
+        ).to_list(None)
+
+        for center in centers:
+            center["_id"] = str(center["_id"])
+
+        return centers
+
+    async def get_center_by_id(self, nrc_id: str):
+        center = await self.db.nrc_centers.find_one(
+            {"nrc_id": nrc_id}
+        )
+
+        if center:
+            center["_id"] = str(center["_id"])
+
+        return center
 
     async def get_nearest_center(self, latitude: float, longitude: float, max_distance: int = 50) -> Optional[dict]:
         """Find nearest NRC center with available beds"""
@@ -36,6 +51,9 @@ class NRCService:
                 }
             }
         )
+        if result:
+            result["_id"] = str(result["_id"])
+
         return result
 
     async def admit_child(self, child_id: str, nrc_id: str, treatment_notes: str = "") -> dict:
