@@ -120,22 +120,46 @@ class ChildService:
         """Get child by ID"""
         return await self.db.children.find_one({"child_id": child_id})
 
-    async def get_children_by_mother_phone(self, mother_phone: str) -> List[dict]:
-        """Get all children for a mother"""
-        return await self.db.children.find({"mother_phone": mother_phone}).to_list(None)
+    async def get_children_by_mother_phone(self, mother_phone: str):
+        children = await self.db.children.find(
+            {"mother_phone": mother_phone}
+        ).to_list(None)
 
-    async def get_children_by_district(self, district: str) -> List[dict]:
-        """Get all children in a district"""
-        return await self.db.children.find({"district": district}).to_list(None)
+        for child in children:
+            child["_id"] = str(child["_id"])
+
+        return children
+
+
+    async def get_children_by_district(self, district: str):
+        children = await self.db.children.find(
+            {"district": district}
+        ).to_list(None)
+
+        for child in children:
+            child["_id"] = str(child["_id"])
+
+        return children
 
     async def get_high_risk_children(self, limit: int = 10) -> List[dict]:
         """Get high-risk children (SAM status)"""
-        return await self.db.children.find(
-            {"health_status": "sam"}
+        children = await self.db.children.find(
+            {"health_status":"sam"}
         ).limit(limit).to_list(None)
 
-    async def get_pending_followups(self, limit: int = 10) -> List[dict]:
-        """Get children with pending followups"""
-        return await self.db.children.find(
-            {"next_followup_date": {"$lte": datetime.utcnow()}}
+        for child in children:
+            child["_id"] = str(child["_id"])
+
+        return children
+
+    async def get_pending_followups(self, limit: int = 10):
+        children = await self.db.children.find(
+            {"next_followup_date":
+                {"$lte": datetime.utcnow()}
+            }
         ).limit(limit).to_list(None)
+
+        for child in children:
+            child["_id"] = str(child["_id"])
+
+        return children
