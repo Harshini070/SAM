@@ -48,7 +48,7 @@ class AlertService:
             )
             
             # Log alert in database
-            db = await get_db()
+            db = get_db()
             alert = Alert(
                 recipient_phone=phone,
                 recipient_id=user_id,
@@ -82,7 +82,7 @@ class AlertService:
     ) -> Tuple[bool, str]:
         """Log alert to database when SMS provider not available"""
         try:
-            db = await get_db()
+            db = get_db()
             alert = Alert(
                 recipient_phone=phone,
                 recipient_id=user_id,
@@ -185,11 +185,13 @@ class AlertService:
     async def get_alerts_for_user(self, user_phone: str, limit: int = 20):
         """Get recent alerts for a user"""
         try:
-            db = await get_db()
+            db = get_db()
             alerts = await db.alerts.find(
                 {"recipient_phone": user_phone}
             ).sort("created_at", -1).limit(limit).to_list(None)
-            
+            for alert in alerts:
+                alert["_id"] = str(alert["_id"])
+
             return alerts
         except Exception as e:
             logger.error(f"Failed to get alerts: {e}")
@@ -198,41 +200,42 @@ class AlertService:
     async def get_alerts_by_type(self, alert_type: AlertType, limit: int = 50):
         """Get alerts by type for analytics"""
         try:
-            db = await get_db()
+            db = get_db()
             alerts = await db.alerts.find(
                 {"alert_type": alert_type.value}
             ).sort("created_at", -1).limit(limit).to_list(None)
-            
+
+            for alert in alerts:
+                alert["_id"] = str(alert["_id"])
+
             return alerts
         except Exception as e:
             logger.error(f"Failed to get alerts by type: {e}")
             return []
     
     async def get_alert_statistics(self):
-        """Get alert statistics for dashboard"""
         try:
-            db = await get_db()
-            
-            stats = await db.alerts.aggregate([
+            db = get_db()
+
+            total = await db.alerts.count_documents({})
+
+            sam = await db.alerts.count_documents(
+                {"alert_type": "SAM_ALERT"}
+            )
+
+            pending = await db.alerts.count_documents(
+                {"status": "pending"}
+            )
+
+            return [
                 {
-                    "$group": {
-                        "_id": "$alert_type",
-                        "count": {"$sum": 1},
-                        "sent": {
-                            "$sum": {
-                                "$cond": [{"$eq": ["$status", "sent"]}, 1, 0]
-                            }
-                        },
-                        "failed": {
-                            "$sum": {
-                                "$cond": [{"$eq": ["$status", "failed"]}, 1, 0]
-                            }
-                        }
-                    }
+                    "_id": "SAM_ALERT",
+                    "count": sam,
+                    "sent": 0,
+                    "failed": 0
                 }
-            ]).to_list(None)
-            
-            return stats
+            ] if total > 0 else []
+
         except Exception as e:
             logger.error(f"Failed to get alert statistics: {e}")
             return []

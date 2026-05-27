@@ -9,17 +9,9 @@ class Settings(BaseSettings):
     # JWT
     secret_key: str = "your-secret-key"
     algorithm: str = "HS256"
+    
     access_token_expire_minutes: int = 1440
     refresh_token_expire_days: int = 7
-    
-    # Twilio
-    twilio_account_sid: Optional[str] = None
-    twilio_auth_token: Optional[str] = None
-    twilio_phone_number: Optional[str] = None
-    
-    # OTP
-    otp_validity_minutes: int = 10
-    otp_length: int = 6
     
     # Blockchain
     blockchain_network: str = "http://localhost:8545"
