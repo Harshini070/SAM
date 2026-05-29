@@ -36,6 +36,8 @@ export const InputField: React.FC<InputFieldProps> = ({
     <View style={[styles.container, containerStyle]}>
       <Text style={styles.label}>{label}</Text>
       <View
+
+        pointerEvents="box-none"
         style={[
           styles.inputRow,
           focused && styles.focused,
@@ -52,6 +54,9 @@ export const InputField: React.FC<InputFieldProps> = ({
         )}
         <TextInput
           style={styles.input}
+
+          editable={true}
+          selectTextOnFocus={true}
           placeholderTextColor={Colors.textMuted}
           secureTextEntry={secureEntry && !showPassword}
           onFocus={() => setFocused(true)}
@@ -78,26 +83,30 @@ const styles = StyleSheet.create({
   label: {
     ...Typography.label,
     color: Colors.textPrimary,
+
+    fontWeight: '600',
     marginBottom: Spacing.xs,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.offWhite,
-    borderRadius: Radius.md,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
+
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
     paddingHorizontal: Spacing.md,
-    minHeight: 50,
+    minHeight: 52,
   },
   focused: {
     borderColor: Colors.primary,
     backgroundColor: Colors.white,
     shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 1,
   },
   errorBorder: { borderColor: Colors.error },
   leftIcon: { marginRight: Spacing.sm },

@@ -73,24 +73,27 @@ export const OfflineIndicator: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 12,
+
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#F3F4F6',
   },
   indicator: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 20,
     borderWidth: 1,
   },
   text: {
     fontSize: 12,
-    fontWeight: '600',
+
+    fontWeight: '700',
     flex: 1,
   },
   badge: {
@@ -109,10 +112,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: 'white',
-    borderRadius: 6,
+
+    backgroundColor: '#F9FAFB',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: '#E5E7EB',
   },
   detailsText: {
     fontSize: 12,

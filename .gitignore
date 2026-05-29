@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+.expo/
+dist/
+web-build/
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+backend/.env
+backend/venv/
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem

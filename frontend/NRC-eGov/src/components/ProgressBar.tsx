@@ -49,8 +49,9 @@ const styles = StyleSheet.create({
   amount: { ...Typography.caption, color: Colors.textSecondary },
   percent: { ...Typography.label, fontWeight: '700' },
   track: {
-    height: 8,
-    backgroundColor: Colors.background,
+
+    height: 6,
+    backgroundColor: '#E5E7EB',
     borderRadius: Radius.full,
     overflow: 'hidden',
   },
