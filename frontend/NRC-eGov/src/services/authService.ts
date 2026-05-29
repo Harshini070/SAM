@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -14,7 +14,11 @@ export const authService = {
   },
 
   // Verify OTP and get tokens (mock)
-  verifyOTP: async (phone: string, code: string) => {
+  verifyOTP: async (
+    phone: string,
+    code: string,
+    role: string = 'Parent'
+  ) => {
     await delay(1000);
     if (code !== '1234') {
       throw new Error('Invalid OTP. Use 1234 for testing.');
@@ -24,14 +28,15 @@ export const authService = {
       refresh_token: 'mock-refresh-token-xyz123',
       user: {
         phone,
-        name: 'Chhattisgarh Officer',
-        role: 'Supervisor',
+        name: 'Test User',
+        role: role,
         district: 'Raipur',
       },
     };
     await AsyncStorage.setItem('accessToken', data.access_token);
     await AsyncStorage.setItem('refreshToken', data.refresh_token);
     await AsyncStorage.setItem('userPhone', phone);
+    await AsyncStorage.setItem('selectedRole', role);
     return data;
   },
 
@@ -42,8 +47,8 @@ export const authService = {
     return {
       data: {
         phone,
-        name: 'Chhattisgarh Officer',
-        role: 'Supervisor',
+        name: 'Test User',
+        role: await AsyncStorage.getItem('selectedRole') || 'Parent',
         district: 'Raipur',
         anganwadi_code: 'AW-492001',
       },
@@ -53,42 +58,13 @@ export const authService = {
   // Logout (mock)
   logout: async () => {
     await delay(400);
-=======
-import api from './api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-export const authService = {
-  // Request OTP
-  requestOTP: (phone: string) =>
-    api.post('/auth/parent/request-otp', { phone }),
-
-  // Verify OTP and get tokens
-  verifyOTP: async (phone: string, code: string) => {
-    const response = await api.post('/auth/parent/verify-otp', { phone, code });
-    if (response.data.access_token) {
-      await AsyncStorage.setItem('accessToken', response.data.access_token);
-      await AsyncStorage.setItem('refreshToken', response.data.refresh_token);
-      await AsyncStorage.setItem('userPhone', phone);
-    }
-    return response.data;
-  },
-
-  // Get current user
-  getCurrentUser: () => api.get('/auth/me'),
-
-  // Logout
-  logout: async () => {
->>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
     await AsyncStorage.removeItem('accessToken');
     await AsyncStorage.removeItem('refreshToken');
     await AsyncStorage.removeItem('userPhone');
   },
 
-<<<<<<< HEAD
+
   // Check if logged in (mock)
-=======
-  // Check if logged in
->>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   isLoggedIn: async () => {
     const token = await AsyncStorage.getItem('accessToken');
     return !!token;

@@ -2,18 +2,26 @@ import React, { createContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const AuthContext = createContext<any>(null);
+export type User = {
+  phone: string;
+  name?: string;
+  role?: string | null;
+};
+
+export const AuthContext = createContext<{
+  isLoggedIn: boolean;
+  loading: boolean;
+  user: User | null;
+  login: (phone: string, code: string) => Promise<any>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+} | null>(null);
 
 export const AuthProvider = ({ children }: any) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
-<<<<<<< HEAD
-  const [userPhone, setUserPhone] = useState<string | null>(null);
-=======
-  const [userPhone, setUserPhone] = useState(null);
->>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
+  const [user, setUser] = useState<User | null>(null);
 
-  // Check if user is already logged in on app start
   useEffect(() => {
     checkLoginStatus();
   }, []);
@@ -21,10 +29,11 @@ export const AuthProvider = ({ children }: any) => {
   const checkLoginStatus = async () => {
     try {
       const token = await AsyncStorage.getItem('accessToken');
-      const phone = await AsyncStorage.getItem('userPhone');
-      if (token && phone) {
+      if (token) {
+        // fetch current user from service (mock or API)
+        const res = await authService.getCurrentUser();
+        setUser(res.data || null);
         setIsLoggedIn(true);
-        setUserPhone(phone);
       }
     } catch (error) {
       console.error('Error checking login status:', error);
@@ -35,9 +44,11 @@ export const AuthProvider = ({ children }: any) => {
 
   const login = async (phone: string, code: string) => {
     try {
-      await authService.verifyOTP(phone, code);
+      const data = await authService.verifyOTP(phone, code);
+      // verifyOTP stores tokens; set user from returned payload when available
+      const u = data.user || (await authService.getCurrentUser()).data;
+      setUser(u);
       setIsLoggedIn(true);
-      setUserPhone(phone);
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message };
@@ -48,14 +59,23 @@ export const AuthProvider = ({ children }: any) => {
     try {
       await authService.logout();
       setIsLoggedIn(false);
-      setUserPhone(null);
+      setUser(null);
     } catch (error) {
       console.error('Error logging out:', error);
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const res = await authService.getCurrentUser();
+      setUser(res.data || null);
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, loading, userPhone, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, loading, user, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

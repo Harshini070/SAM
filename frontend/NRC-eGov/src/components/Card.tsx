@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     padding: Spacing.md,
     shadowColor: Colors.shadow,
-<<<<<<< HEAD
+
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
     shadowRadius: 16,
@@ -55,21 +55,13 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
   },
   noPadding: { padding: 0, borderWidth: 0 },
-=======
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  noPadding: { padding: 0 },
->>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   statCard: {
     backgroundColor: Colors.card,
     borderRadius: Radius.lg,
     padding: Spacing.md,
     alignItems: 'center',
     shadowColor: Colors.shadow,
-<<<<<<< HEAD
+
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
     shadowRadius: 16,
@@ -78,14 +70,6 @@ const styles = StyleSheet.create({
     margin: Spacing.xs,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-=======
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-    elevation: 3,
-    flex: 1,
-    margin: Spacing.xs,
->>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   },
   statIcon: {
     width: 44,

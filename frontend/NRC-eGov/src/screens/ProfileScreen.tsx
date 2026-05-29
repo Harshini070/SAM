@@ -105,7 +105,7 @@ export const ProfileScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
+
   flex: { flex: 1, backgroundColor: Colors.background },
   scroll: { flex: 1 },
   content: { padding: 16, paddingBottom: 32 },
@@ -130,30 +130,4 @@ const styles = StyleSheet.create({
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.white, borderRadius: 14, paddingVertical: 14, shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 1, shadowRadius: 16, elevation: 2, borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.15)', marginTop: 8 },
   logoutText: { fontSize: 13, fontWeight: '800', color: Colors.error },
   versionText: { fontSize: 10, color: Colors.textMuted, textAlign: 'center', marginTop: 24, fontWeight: '500' },
-=======
-  flex: { flex: 1, backgroundColor: '#EEF2F7' },
-  scroll: { flex: 1 },
-  content: { padding: 16, paddingBottom: 32 },
-  userCard: { backgroundColor: Colors.white, borderRadius: 16, padding: 20, alignItems: 'center', shadowColor: 'rgba(0,43,91,0.08)', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 2, marginBottom: 16 },
-  avatarWrap: { width: 68, height: 68, borderRadius: 34, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  avatarText: { fontSize: 24, fontWeight: '800', color: Colors.white },
-  activeIndicator: { position: 'absolute', bottom: 2, right: 2, width: 14, height: 14, borderRadius: 7, backgroundColor: Colors.success, borderWidth: 2, borderColor: Colors.white },
-  userName: { fontSize: 18, fontWeight: '700', color: Colors.textPrimary },
-  userRole: { fontSize: 12, color: Colors.textSecondary, marginTop: 4, textAlign: 'center' },
-  statusRow: { marginTop: 10 },
-  statusPill: { backgroundColor: Colors.primary + '12', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
-  statusPillText: { fontSize: 10, color: Colors.primary, fontWeight: '700' },
-  sectionWrap: { marginBottom: 16 },
-  sectionTitle: { fontSize: 12, fontWeight: '700', color: Colors.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5, paddingLeft: 4 },
-  menuCard: { backgroundColor: Colors.white, borderRadius: 14, paddingHorizontal: 14, shadowColor: 'rgba(0,43,91,0.08)', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 2 },
-  menuItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14 },
-  borderBottom: { borderBottomWidth: 1, borderBottomColor: '#EEF2F7' },
-  menuLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  menuLabel: { fontSize: 13, color: Colors.textPrimary, fontWeight: '500' },
-  menuRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  menuValue: { fontSize: 12, color: Colors.textSecondary },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.white, borderRadius: 14, paddingVertical: 14, shadowColor: 'rgba(0,43,91,0.08)', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8, elevation: 2, borderWidth: 1, borderColor: 'rgba(229,57,53,0.15)', marginTop: 8 },
-  logoutText: { fontSize: 13, fontWeight: '700', color: Colors.error },
-  versionText: { fontSize: 10, color: Colors.textMuted, textAlign: 'center', marginTop: 24 },
->>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
 });

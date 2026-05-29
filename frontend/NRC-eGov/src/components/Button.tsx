@@ -95,17 +95,11 @@ const styles = StyleSheet.create({
   primary: {
     backgroundColor: Colors.primary,
     shadowColor: Colors.primary,
-<<<<<<< HEAD
+
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
     elevation: 4,
-=======
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
->>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
   },
   outline: {
     backgroundColor: 'transparent',

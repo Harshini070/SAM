@@ -2,11 +2,8 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-<<<<<<< HEAD
+
 import api from './api';
-=======
-import { api } from './api';
->>>>>>> 5e8bec6be688a352d89cc92498e0f2b61eef0eb8
 
 // Configure notification channel
 Notifications.setNotificationHandler({
