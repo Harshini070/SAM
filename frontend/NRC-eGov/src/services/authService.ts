@@ -1,16 +1,19 @@
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { client } from '../api/client';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const authService = {
   // Request OTP (mock)
   requestOTP: async (phone: string) => {
-    await delay(800);
-    if (!phone || phone.length !== 10) {
-      throw new Error('Please enter a valid 10-digit mobile number');
-    }
-    return { success: true, message: 'OTP sent successfully' };
+    const response = await client.post(
+      '/api/auth/parent/request-otp',
+      {
+        phone,
+      }
+    );
+
+    return response.data;
   },
 
   // Verify OTP and get tokens (mock)
@@ -19,39 +22,55 @@ export const authService = {
     code: string,
     role: string = 'Parent'
   ) => {
-    await delay(1000);
-    if (code !== '1234') {
-      throw new Error('Invalid OTP. Use 1234 for testing.');
-    }
-    const data = {
-      access_token: 'mock-access-token-xyz123',
-      refresh_token: 'mock-refresh-token-xyz123',
-      user: {
+
+    const response = await client.post(
+      '/api/auth/parent/verify-otp',
+      {
         phone,
-        name: 'Test User',
-        role: role,
-        district: 'Raipur',
-      },
-    };
-    await AsyncStorage.setItem('accessToken', data.access_token);
-    await AsyncStorage.setItem('refreshToken', data.refresh_token);
-    await AsyncStorage.setItem('userPhone', phone);
-    await AsyncStorage.setItem('selectedRole', role);
+        code,
+      }
+    );
+
+    const data = response.data;
+
+    await AsyncStorage.setItem(
+      'accessToken',
+      data.access_token
+    );
+
+    await AsyncStorage.setItem(
+      'refreshToken',
+      data.refresh_token
+    );
+
+    await AsyncStorage.setItem(
+      'userPhone',
+      phone
+    );
+
+    await AsyncStorage.setItem(
+      'selectedRole',
+      role
+    );
+
     return data;
   },
 
   // Get current user (mock)
   getCurrentUser: async () => {
-    await delay(500);
-    const phone = await AsyncStorage.getItem('userPhone') || '9876543210';
+    const token = await AsyncStorage.getItem('accessToken');
+
+    const response = await client.get(
+      '/api/auth/me',
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
     return {
-      data: {
-        phone,
-        name: 'Test User',
-        role: await AsyncStorage.getItem('selectedRole') || 'Parent',
-        district: 'Raipur',
-        anganwadi_code: 'AW-492001',
-      },
+      data: response.data,
     };
   },
 

@@ -46,40 +46,40 @@ export const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) =>
     }
   };
 
-const handleVerifyOTP = async () => {
-  if (!otp || otp.length !== 4) {
-    setError('Enter the 4-digit OTP');
-    return;
-  }
-
-  setLoading(true);
-  setError('');
-
-  try {
-    await authService.verifyOTP(
-      phone,
-      otp,
-      selectedRole
-    );
-
-    if (isRegisterFlow) {
-      navigation.replace('FullRegistration', {
-        phone,
-        role: selectedRole,
-      });
-    } else {
-      navigation.replace('MainTabs');
+  const handleVerifyOTP = async () => {
+    if (!otp || otp.length !== 6) {
+      setError('Enter the 4-digit OTP');
+      return;
     }
 
-  } catch (err: any) {
-    setError(err.message || 'OTP verification failed');
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    setError('');
+
+    try {
+      await authService.verifyOTP(
+        phone,
+        otp,
+        selectedRole
+      );
+
+      if (isRegisterFlow) {
+        navigation.replace('FullRegistration', {
+          phone,
+          role: selectedRole,
+        });
+      } else {
+        navigation.replace('MainTabs');
+      }
+
+    } catch (err: any) {
+      setError(err.message || 'OTP verification failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}> 
+    <View style={[styles.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
       <Text style={styles.title}>{isRegisterFlow ? 'Verify Mobile Number' : 'Mobile Number Login'}</Text>
       <Text style={styles.subtitle}>{isRegisterFlow ? 'Enter OTP to continue registration' : 'Receive a one-time code on your mobile'}</Text>
 

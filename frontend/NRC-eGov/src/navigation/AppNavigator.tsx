@@ -131,22 +131,23 @@ function AdminTabs() {
 
 function RoleBasedTabs() {
   const auth = useContext(AuthContext);
-  const role = auth?.user?.role || auth?.user?.role?.toString() || '';
+  const role = auth?.user?.role?.toLowerCase() || '';
 
-  // Simple mapping - keep scalable: fall back to default Dashboard
-  if (role === 'Mitanin' || role === 'Mitanin Worker' || role === 'Mitanin') {
-    return <MitaninTabs />;
-  }
+  console.log("ROLE =", role);
+  console.log("USER =", auth?.user);
 
-  if (role === 'Parent') {
+  if (role === 'parent') {
     return <ParentTabs />;
   }
 
-  if (role === 'State Admin' || role === 'State Admin' || role === 'Supervisor') {
+  if (role === 'mitanin') {
+    return <MitaninTabs />;
+  }
+
+  if (role === 'state admin') {
     return <AdminTabs />;
   }
 
-  // default
   return (
     <View style={styles.mainTabsContainer}>
       <OfflineIndicator />
@@ -156,18 +157,12 @@ function RoleBasedTabs() {
           tabBarStyle: styles.tabBar,
           tabBarActiveTintColor: Colors.primary,
           tabBarInactiveTintColor: Colors.textMuted,
-          tabBarLabelStyle: styles.tabLabel,
-          tabBarIconStyle: { marginTop: 2 },
-          tabBarIcon: ({ focused, color }) => {
-            const icon = focused ? TAB_ACTIVE[route.name] : TAB_ICONS[route.name];
-            return <Ionicons name={icon as any} size={22} color={color} />;
-          },
         })}
       >
-        <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Home' }} />
-        <Tab.Screen name="Children" component={ChildrenListScreen} options={{ title: 'Children' }} />
-        <Tab.Screen name="NRCCenters" component={NRCCentersScreen} options={{ title: 'NRC Centers' }} />
-        <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
+        <Tab.Screen
+          name="Dashboard"
+          component={DashboardScreen}
+        />
       </Tab.Navigator>
     </View>
   );

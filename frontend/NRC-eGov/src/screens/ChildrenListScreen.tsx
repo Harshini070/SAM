@@ -56,6 +56,7 @@ export const ChildrenListScreen: React.FC = () => {
     setError('');
     try {
       const data = await childService.getChildrenByMother();
+      console.log("CHILDREN =", data);
       setChildren(data);
     } catch (err: any) {
       console.error('Failed to fetch children:', err);
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
   metaLabel: { fontSize: 10, color: Colors.textMuted, fontWeight: '500' },
   viewBtn: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 2 },
   viewBtnText: { fontSize: 11, color: Colors.primary, fontWeight: '700' },
-  
+
   // Custom Fallbacks styling
   emptyWrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.xxl, gap: Spacing.sm },
   emptyTitle: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary, marginTop: Spacing.sm },

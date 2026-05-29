@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { authService } from '../../services/authService';
 import {
   View,
   Text,
@@ -40,14 +41,25 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
       setError('Please enter a valid phone number');
       return;
     }
+
     setLoading(true);
     setError('');
+
     try {
-      // Placeholder: replace with real OTP request
+      await authService.requestOTP(phone);
+
       setOtpSent(true);
-      Alert.alert('Success', 'OTP sent to your phone');
+
+      Alert.alert(
+        'Success',
+        'OTP sent successfully'
+      );
+
     } catch (err: any) {
-      const message = err?.response?.data?.detail || 'Failed to send OTP';
+      const message =
+        err?.response?.data?.detail ||
+        'Failed to send OTP';
+
       setError(message);
       Alert.alert('Error', message);
     } finally {
@@ -56,7 +68,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleVerifyOTP = async () => {
-    if (!otp || otp.length !== 4) {
+    if (!otp || otp.length !== 6) {
       setError('Please enter a valid OTP');
       return;
     }
@@ -107,11 +119,11 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
         <View style={styles.headingBlock}>
           <Text style={[Typography.h2, { color: Colors.primary }]}>Welcome!</Text>
-          <Text style={[Typography.body, { color: Colors.textSecondary, marginTop: 4 }]}> 
+          <Text style={[Typography.body, { color: Colors.textSecondary, marginTop: 4 }]}>
             {otpSent ? 'Enter OTP sent to your phone' : 'Login with your phone number'}
           </Text>
         </View>
-        
+
         <View style={{ flexDirection: 'row', marginBottom: 20 }}>
           <TouchableOpacity
             style={{
@@ -169,7 +181,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 value={otp}
                 onChangeText={setOtp}
                 keyboardType='numeric'
-                maxLength={4}
+                maxLength={6}
                 editable={!loading}
               />
               {error ? <Text style={styles.errorText}>{error}</Text> : null}

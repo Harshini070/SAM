@@ -1,6 +1,6 @@
 
+import { client } from '../api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const INITIAL_MOCK_CHILDREN = [
@@ -102,7 +102,7 @@ export const childService = {
   registerChild: async (childData: any) => {
     await delay(1200);
     const list = await getStoredChildren();
-    
+
     // Auto-predict status if missing
     let status = childData.healthStatus || 'Healthy';
     const muacVal = parseFloat(childData.muac);
@@ -154,27 +154,46 @@ export const childService = {
     return {
       predicted_status: predictedStatus,
       confidence: 0.94,
-      recommendation: predictedStatus === 'SAM' 
-        ? 'High Risk: Referral to nearest Nutrition Rehabilitation Centre (NRC) recommended immediately.' 
+      recommendation: predictedStatus === 'SAM'
+        ? 'High Risk: Referral to nearest Nutrition Rehabilitation Centre (NRC) recommended immediately.'
         : predictedStatus === 'MAM'
-        ? 'Moderate Risk: Provide supplementary nutrition at Anganwadi and review in 15 days.'
-        : 'Normal: Continue standard growth monitoring at Anganwadi center.',
+          ? 'Moderate Risk: Provide supplementary nutrition at Anganwadi and review in 15 days.'
+          : 'Normal: Continue standard growth monitoring at Anganwadi center.',
     };
   },
 
   // Get child by ID (mock)
   getChild: async (childId: string) => {
-    await delay(500);
-    const list = await getStoredChildren();
-    const child = list.find((c: any) => c.child_id === childId);
-    if (!child) throw new Error('Child not found');
-    return { data: child };
+    const token = await AsyncStorage.getItem('accessToken');
+
+    const response = await client.get(
+      `/api/children/${childId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
   },
 
   // Get all children for logged-in mother / officer (mock)
   getChildrenByMother: async () => {
-    await delay(1000);
-    return getStoredChildren();
+    const phone = await AsyncStorage.getItem('userPhone');
+
+    const token = await AsyncStorage.getItem('accessToken');
+
+    const response = await client.get(
+      `/api/children/by-mother/${phone}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data.children;
   },
 
   // Get children by district (mock)

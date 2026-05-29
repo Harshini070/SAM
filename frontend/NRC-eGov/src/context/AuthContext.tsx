@@ -32,6 +32,9 @@ export const AuthProvider = ({ children }: any) => {
       if (token) {
         // fetch current user from service (mock or API)
         const res = await authService.getCurrentUser();
+
+        console.log("USER DATA =", res.data);
+
         setUser(res.data || null);
         setIsLoggedIn(true);
       }
@@ -45,9 +48,15 @@ export const AuthProvider = ({ children }: any) => {
   const login = async (phone: string, code: string) => {
     try {
       const data = await authService.verifyOTP(phone, code);
+
+      console.log("LOGIN DATA =", data);
       // verifyOTP stores tokens; set user from returned payload when available
       const u = data.user || (await authService.getCurrentUser()).data;
+
+      console.log("USER OBJECT =", u);
+
       setUser(u);
+
       setIsLoggedIn(true);
       return { success: true };
     } catch (error: any) {
