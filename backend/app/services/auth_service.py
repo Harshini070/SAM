@@ -94,3 +94,15 @@ class AuthService:
         """Get user by MongoDB ObjectId"""
         from bson import ObjectId
         return await self.db.users.find_one({"_id": ObjectId(user_id)})
+
+    async def update_profile(self, phone: str, update_data: dict) -> bool:
+        """Update user profile fields by phone number"""
+        try:
+            result = await self.db.users.update_one(
+                {"phone": phone},
+                {"$set": update_data}
+            )
+            return result.modified_count >= 0
+        except Exception as e:
+            print(f"Error in update_profile: {e}")
+            return False

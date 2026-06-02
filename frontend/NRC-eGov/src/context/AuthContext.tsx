@@ -6,6 +6,9 @@ export type User = {
   phone: string;
   name?: string;
   role?: string | null;
+  district?: string | null;
+  center_id?: string | null;
+  is_active?: boolean;
 };
 
 export const AuthContext = createContext<{

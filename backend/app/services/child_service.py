@@ -9,6 +9,29 @@ class ChildService:
         self.db = get_db()
 
     async def register_child(self, data: dict) -> dict:
+        request_id = data.get("request_id")
+        if request_id:
+            # Check for existing request in idempotent_requests collection
+            existing_request = await self.db.idempotent_requests.find_one({"request_id": request_id})
+            if existing_request:
+                # Find the child associated with this request
+                child = await self.db.children.find_one({"child_id": existing_request["child_id"]})
+                if child:
+                    child["_id"] = str(child["_id"])
+                    return child
+
+        # Fallback/Safety Net: duplicate detection by checking same details in the last 5 seconds
+        time_threshold = datetime.utcnow() - timedelta(seconds=5)
+        existing_child = await self.db.children.find_one({
+            "name": data["name"],
+            "mother_phone": data["mother_phone"],
+            "dob": data["dob"],
+            "created_at": {"$gte": time_threshold}
+        })
+        if existing_child:
+            existing_child["_id"] = str(existing_child["_id"])
+            return existing_child
+
         child_id = generate_child_id()
 
     # Calculate age in months
@@ -54,6 +77,16 @@ class ChildService:
             else datetime.utcnow() + timedelta(days=15)
         )
 
+        growth_history = []
+        if data.get("weight") is not None:
+            growth_history.append({
+                "date": datetime.utcnow().strftime("%Y-%m-%d"),
+                "weight": data["weight"],
+                "height": data.get("height"),
+                "muac": data.get("muac"),
+                "status": prediction["status"]
+            })
+
         child_doc = {
             "child_id": child_id,
             "name": data["name"],
@@ -73,7 +106,7 @@ class ChildService:
             "next_followup_date": next_followup,
 
             "nrc_assigned": nrc_assigned,
-            
+            "growth_history": growth_history,
 
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow()
@@ -81,6 +114,14 @@ class ChildService:
 
         result = await self.db.children.insert_one(child_doc)
         child_doc["_id"] = str(result.inserted_id)
+
+        # Record request_id for idempotency
+        if request_id:
+            await self.db.idempotent_requests.insert_one({
+                "request_id": request_id,
+                "child_id": child_id,
+                "created_at": datetime.utcnow()
+            })
 
         return child_doc
 
@@ -105,9 +146,20 @@ class ChildService:
             "updated_at": datetime.utcnow()
         }
         
+        history_entry = {
+            "date": datetime.utcnow().strftime("%Y-%m-%d"),
+            "weight": weight,
+            "height": height,
+            "muac": muac,
+            "status": prediction["status"]
+        }
+        
         await self.db.children.update_one(
             {"child_id": child_id},
-            {"$set": update_doc}
+            {
+                "$set": update_doc,
+                "$push": {"growth_history": history_entry}
+            }
         )
         
         return {
@@ -118,7 +170,10 @@ class ChildService:
 
     async def get_child(self, child_id: str) -> Optional[dict]:
         """Get child by ID"""
-        return await self.db.children.find_one({"child_id": child_id})
+        child = await self.db.children.find_one({"child_id": child_id})
+        if child:
+            child["_id"] = str(child["_id"])
+        return child
 
     async def get_children_by_mother_phone(self, mother_phone: str):
         children = await self.db.children.find(

@@ -253,3 +253,70 @@ class AlertService:
             AlertType.ADMIN_NOTIFICATION: "Administrative Notification",
         }
         return titles.get(alert_type, "Notification")
+
+    async def mark_alert_as_read(self, alert_id: str) -> bool:
+        """Mark alert as read in the database"""
+        try:
+            db = get_db()
+            from bson import ObjectId
+            try:
+                oid = ObjectId(alert_id)
+            except Exception:
+                oid = alert_id
+            
+            result = await db.alerts.update_one(
+                {"_id": oid},
+                {"$set": {"status": "read"}}
+            )
+            if result.matched_count == 0 and isinstance(oid, ObjectId):
+                result = await db.alerts.update_one(
+                    {"_id": alert_id},
+                    {"$set": {"status": "read"}}
+                )
+            return result.modified_count > 0 or result.matched_count > 0
+        except Exception as e:
+            logger.error(f"Failed to mark alert as read: {e}")
+            return False
+
+    async def mark_all_alerts_as_read(self, user_phone: str) -> bool:
+        """Mark all alerts for a user as read in the database"""
+        try:
+            db = get_db()
+            result = await db.alerts.update_many(
+                {"recipient_phone": user_phone},
+                {"$set": {"status": "read"}}
+            )
+            return True
+        except Exception as e:
+            logger.error(f"Failed to mark all alerts as read for {user_phone}: {e}")
+            return False
+
+    async def clear_all_alerts(self, user_phone: str) -> bool:
+        """Delete all alerts for a user in the database"""
+        try:
+            db = get_db()
+            result = await db.alerts.delete_many(
+                {"recipient_phone": user_phone}
+            )
+            return True
+        except Exception as e:
+            logger.error(f"Failed to clear all alerts for {user_phone}: {e}")
+            return False
+
+    async def delete_alert(self, alert_id: str) -> bool:
+        """Delete a single alert from database"""
+        try:
+            db = get_db()
+            from bson import ObjectId
+            try:
+                oid = ObjectId(alert_id)
+            except Exception:
+                oid = alert_id
+            
+            result = await db.alerts.delete_one({"_id": oid})
+            if result.deleted_count == 0 and isinstance(oid, ObjectId):
+                result = await db.alerts.delete_one({"_id": alert_id})
+            return result.deleted_count > 0
+        except Exception as e:
+            logger.error(f"Failed to delete alert: {e}")
+            return False

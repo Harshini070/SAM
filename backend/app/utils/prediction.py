@@ -1,5 +1,4 @@
 from datetime import datetime
-import pandas as pd
 from typing import Optional, Dict
 import sys
 sys.path.insert(0, '/'.join(__file__.split('/')[:-3]))

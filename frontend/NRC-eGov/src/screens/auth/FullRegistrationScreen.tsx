@@ -9,6 +9,7 @@ import { InputField } from '../../components/InputField';
 import { Colors } from '../../theme/colors';
 import { Spacing, Radius } from '../../theme/spacing';
 import { Typography } from '../../theme/typography';
+import { useLanguage } from '../../context/LanguageContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'FullRegistration'>;
@@ -17,12 +18,14 @@ type Props = {
 
 export const FullRegistrationScreen: React.FC<Props> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
+  const { t, locale } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState(route.params?.phone || '');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (route.params?.phone) {
@@ -31,23 +34,28 @@ export const FullRegistrationScreen: React.FC<Props> = ({ navigation, route }) =
   }, [route.params?.phone]);
 
   const handleSubmit = () => {
+    if (loading) return;
     if (!name.trim() || !email.trim() || !mobile.trim() || !password || !confirmPassword) {
-      setError('All fields are required.');
+      setError(t('fieldsRequiredError'));
       return;
     }
     if (mobile.length !== 10) {
-      setError('Mobile number must be 10 digits.');
+      setError(t('mobileFormat'));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError(t('passwordsMismatchError'));
       return;
     }
 
     setError('');
-    Alert.alert('Registration complete', 'Your account has been successfully created.', [
-      { text: 'Continue', onPress: () => navigation.replace('MainTabs') },
-    ]);
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      Alert.alert(t('regSuccessTitle'), t('regSuccessMsg'), [
+        { text: t('continueBtn'), onPress: () => navigation.replace('MainTabs') },
+      ]);
+    }, 800);
   };
 
   return (
@@ -56,60 +64,65 @@ export const FullRegistrationScreen: React.FC<Props> = ({ navigation, route }) =
       contentContainerStyle={[styles.container, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 30 }]}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>Full Registration</Text>
-      <Text style={styles.subtitle}>Complete your account details to finish registration.</Text>
+      <Text style={styles.title}>{t('fullRegistrationTitle')}</Text>
+      <Text style={styles.subtitle}>{t('completeDetailsText')}</Text>
 
       <View style={styles.card}>
         <InputField
-          label="Full Name"
+          label={t('fullNameLabel')}
           icon="person-outline"
-          placeholder="Enter your full name"
+          placeholder={t('enterFullName')}
           value={name}
           onChangeText={setName}
           autoCapitalize="words"
+          editable={!loading}
         />
         <InputField
-          label="Email Address"
+          label={t('emailAddressLabel')}
           icon="mail-outline"
-          placeholder="name@example.com"
+          placeholder={t('enterEmailAddress')}
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
+          editable={!loading}
         />
         <InputField
-          label="Mobile Number"
+          label={t('mobileNumber')}
           icon="call-outline"
-          placeholder="10-digit mobile number"
+          placeholder={t('parentMobilePlaceholder')}
           keyboardType="phone-pad"
           value={mobile}
           onChangeText={(value) => setMobile(value.replace(/[^0-9]/g, ''))}
           maxLength={10}
+          editable={!loading}
         />
         <InputField
-          label="Password"
+          label={t('passwordLabel')}
           icon="lock-closed-outline"
-          placeholder="Create password"
+          placeholder={t('createPasswordPlaceholder')}
           secureEntry
           value={password}
           onChangeText={setPassword}
+          editable={!loading}
         />
         <InputField
-          label="Confirm Password"
+          label={t('confirmPasswordLabel')}
           icon="lock-closed-outline"
-          placeholder="Confirm password"
+          placeholder={t('confirmPasswordPlaceholder')}
           secureEntry
           value={confirmPassword}
           onChangeText={setConfirmPassword}
+          editable={!loading}
         />
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        <Button label="Submit Registration" onPress={handleSubmit} style={styles.submitButton} />
+        <Button label={t('submitRegistration')} onPress={handleSubmit} loading={loading} style={styles.submitButton} />
       </View>
 
       <View style={styles.noteContainer}>
-        <Text style={styles.noteTitle}>Your information is protected</Text>
-        <Text style={styles.noteBody}>All registration details are stored securely and used only for authorized NRC e-Governance access.</Text>
+        <Text style={styles.noteTitle}>{t('infoProtectedTitle')}</Text>
+        <Text style={styles.noteBody}>{t('infoProtectedBody')}</Text>
       </View>
     </ScrollView>
   );

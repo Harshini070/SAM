@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   ScrollView,
   StatusBar,
   useWindowDimensions,
+  Modal,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,18 +17,31 @@ import { RootStackParamList } from '../../navigation/types';
 import { Colors } from '../../theme/colors';
 import { Radius, Spacing } from '../../theme/spacing';
 import { Typography } from '../../theme/typography';
+import { useLanguage, LocaleType } from '../../context/LanguageContext';
+import { Ionicons } from '@expo/vector-icons';
+import { Button } from '../../components/Button';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Landing'>;
 };
 
+const screenHeight = Dimensions.get('window').height;
+
 export const LandingPage: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const isWide = width >= 720;
+  const { t, locale, setLocale } = useLanguage();
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
 
   const handleLogin = () => navigation.navigate('Login');
   const handleRegister = () => navigation.navigate('Register');
+
+  const getLangLabel = (code: string) => {
+    if (code === 'hi') return 'हिंदी';
+    if (code === 'cg') return 'छत्तीसगढ़ी';
+    return 'English';
+  };
 
   return (
     <LinearGradient
@@ -42,34 +57,45 @@ export const LandingPage: React.FC<Props> = ({ navigation }) => {
       >
         <View style={styles.heroHeader}>
           <View style={styles.heroTextGroup}>
-            <Text style={styles.title}>NRC e-Governance</Text>
-            <Text style={styles.subtitle}>A unified platform for nutrition rehabilitation monitoring across Chhattisgarh.</Text>
+            <Text style={styles.title}>{t('landingTitle')}</Text>
+            <Text style={styles.subtitle}>{t('landingSubtitle')}</Text>
           </View>
-          <View style={styles.pillBadge}>
-            <Text style={styles.pillBadgeText}>Official Portal</Text>
+          <View style={styles.headerRight}>
+            <TouchableOpacity 
+              style={styles.langSelectorBtn} 
+              onPress={() => setLanguageModalVisible(true)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="language-outline" size={14} color={Colors.white} />
+              <Text style={styles.langSelectorText}>{getLangLabel(locale)}</Text>
+              <Ionicons name="chevron-down-outline" size={10} color={Colors.white} />
+            </TouchableOpacity>
+            <View style={styles.pillBadge}>
+              <Text style={styles.pillBadgeText}>{t('officialPortal')}</Text>
+            </View>
           </View>
         </View>
 
         <View style={[styles.cardGrid, isWide && styles.cardGridWide]}>
           <View style={[styles.card, isWide && styles.cardSpacing]}> 
-            <Text style={styles.sectionTitle}>Register</Text>
-            <Text style={styles.sectionCopy}>Secure onboarding for field staff and caregivers.</Text>
+            <Text style={styles.sectionTitle}>{t('registerTitle')}</Text>
+            <Text style={styles.sectionCopy}>{t('registerSub')}</Text>
             <TouchableOpacity style={styles.primaryButton} onPress={handleRegister} activeOpacity={0.86}>
-              <Text style={styles.primaryButtonText}>Register with Mobile</Text>
+              <Text style={styles.primaryButtonText}>{t('registerMobileBtn')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.secondaryButton} onPress={handleRegister} activeOpacity={0.86}>
-              <Text style={styles.secondaryButtonText}>Register with Gmail</Text>
+              <Text style={styles.secondaryButtonText}>{t('registerGmailBtn')}</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Login</Text>
-            <Text style={styles.sectionCopy}>Access your dashboard, reports, and child records instantly.</Text>
+            <Text style={styles.sectionTitle}>{t('loginTitle')}</Text>
+            <Text style={styles.sectionCopy}>{t('loginSub')}</Text>
             <TouchableOpacity style={styles.primaryButton} onPress={handleLogin} activeOpacity={0.86}>
-              <Text style={styles.primaryButtonText}>Login with Password</Text>
+              <Text style={styles.primaryButtonText}>{t('loginPasswordBtn')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.secondaryButton} onPress={handleLogin} activeOpacity={0.86}>
-              <Text style={styles.secondaryButtonText}>Login with OTP</Text>
+              <Text style={styles.secondaryButtonText}>{t('loginOtpBtn')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -77,24 +103,60 @@ export const LandingPage: React.FC<Props> = ({ navigation }) => {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>142</Text>
-            <Text style={styles.statLabel}>NRC Centers</Text>
+            <Text style={styles.statLabel}>{t('nrcCentersStat')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>12K+</Text>
-            <Text style={styles.statLabel}>Children Monitored</Text>
+            <Text style={styles.statLabel}>{t('childrenMonitoredStat')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>25%</Text>
-            <Text style={styles.statLabel}>SAM Recovery</Text>
+            <Text style={styles.statLabel}>{t('samRecoveryStat')}</Text>
           </View>
         </View>
 
         <View style={styles.footerContainer}>
-          <Text style={styles.footerHeading}>Trusted by Government Agencies</Text>
-          <Text style={styles.footerCopy}>The platform is built for transparency, empowerment, and real-time decision-making in the NRC ecosystem.</Text>
-          <Text style={styles.footerNote}>Powered by NIC · Ministry of Women & Child Development</Text>
+          <Text style={styles.footerHeading}>{t('trustedGov')}</Text>
+          <Text style={styles.footerCopy}>{t('platformTrustText')}</Text>
+          <Text style={styles.footerNote}>{t('poweredByNic')}</Text>
         </View>
       </ScrollView>
+
+      {/* Language Picker bottom sheet modal */}
+      <Modal visible={languageModalVisible} transparent animationType="slide">
+        <View style={styles.modalBackdrop}>
+          <TouchableOpacity style={styles.backdropButton} onPress={() => setLanguageModalVisible(false)} />
+          <View style={styles.modalContent}>
+            <View style={styles.dragIndicator} />
+            <Text style={styles.modalTitle}>{t('langSelector')}</Text>
+
+            {[
+              { code: 'en', label: 'English (EN)' },
+              { code: 'hi', label: 'Hindi (हिंदी)' },
+              { code: 'cg', label: 'Chhattisgarhi (छत्तीसगढ़ी)' }
+            ].map((lang) => (
+              <TouchableOpacity
+                key={lang.code}
+                style={[styles.langItem, locale === lang.code && styles.langItemActive]}
+                onPress={() => setLocale(lang.code as LocaleType)}
+              >
+                <Text style={[styles.langText, locale === lang.code && styles.langTextActive]}>
+                  {lang.label}
+                </Text>
+                {locale === lang.code && <Ionicons name="checkmark-circle" size={16} color={Colors.primary} />}
+              </TouchableOpacity>
+            ))}
+
+            <Button
+              label={t('applyLanguageBtn')}
+              onPress={() => {
+                setLanguageModalVisible(false);
+              }}
+              style={{ marginTop: 24 }}
+            />
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 };
@@ -106,8 +168,11 @@ const styles = StyleSheet.create({
   heroTextGroup: { flex: 1, paddingRight: Spacing.sm },
   title: { color: Colors.white, fontSize: 34, lineHeight: 42, fontWeight: '900', marginBottom: Spacing.xs },
   subtitle: { color: 'rgba(255,255,255,0.88)', fontSize: 16, lineHeight: 24, maxWidth: 560 },
-  pillBadge: { backgroundColor: 'rgba(255,255,255,0.20)', borderRadius: Radius.full, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm, alignSelf: 'flex-start' },
+  headerRight: { alignItems: 'flex-end', gap: Spacing.xs },
+  pillBadge: { backgroundColor: 'rgba(255,255,255,0.20)', borderRadius: Radius.full, paddingHorizontal: Spacing.lg, paddingVertical: Spacing.sm },
   pillBadgeText: { color: Colors.white, fontSize: 12, fontWeight: '700' },
+  langSelectorBtn: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, backgroundColor: 'rgba(255, 255, 255, 0.15)', borderRadius: Radius.full, paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.25)', minHeight: 32 },
+  langSelectorText: { color: Colors.white, fontSize: 11, fontWeight: '700' },
   cardGrid: {},
   cardGridWide: { flexDirection: 'row', justifyContent: 'space-between' },
   card: { backgroundColor: Colors.white, borderRadius: 24, padding: Spacing.lg, flex: 1, minHeight: 280, marginBottom: Spacing.lg, shadowColor: Colors.shadow, shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.12, shadowRadius: 28, elevation: 7, borderWidth: 1, borderColor: 'rgba(10, 25, 49, 0.08)' },
@@ -126,4 +191,14 @@ const styles = StyleSheet.create({
   footerHeading: { color: Colors.white, fontSize: 16, fontWeight: '700', marginBottom: Spacing.sm },
   footerCopy: { color: 'rgba(255,255,255,0.82)', fontSize: 14, lineHeight: 22, marginBottom: Spacing.sm },
   footerNote: { color: 'rgba(255,255,255,0.68)' },
+  
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.4)', justifyContent: 'flex-end' },
+  backdropButton: { flex: 1 },
+  modalContent: { backgroundColor: Colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 36, maxHeight: screenHeight * 0.85, borderTopWidth: 1, borderTopColor: '#E2E8F0' },
+  dragIndicator: { width: 36, height: 4, borderRadius: 2, backgroundColor: '#CBD5E1', alignSelf: 'center', marginBottom: 16 },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: Colors.primary, marginBottom: 18 },
+  langItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+  langItemActive: { backgroundColor: '#F0F9FF', paddingHorizontal: 10, borderRadius: 10 },
+  langText: { fontSize: 13, color: Colors.textPrimary, fontWeight: '600' },
+  langTextActive: { color: Colors.primary, fontWeight: '800' },
 });

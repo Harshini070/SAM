@@ -38,6 +38,7 @@ class ChildRegistrationRequest(BaseModel):
     weight: Optional[float] = None
     height: Optional[float] = None
     muac: Optional[float] = None
+    request_id: Optional[str] = None
 
 class ChildUpdateRequest(BaseModel):
     weight: Optional[float] = None
@@ -61,3 +62,7 @@ class NRCAdmissionUpdateRequest(BaseModel):
     status: str
     recovery_percentage: Optional[float] = None
     treatment_notes: Optional[str] = None
+
+class ProfileUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    district: Optional[str] = None

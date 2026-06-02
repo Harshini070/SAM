@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,92 +16,142 @@ import { Colors } from '../theme/colors';
 import { Spacing, Radius } from '../theme/spacing';
 import { Typography } from '../theme/typography';
 import { Ionicons } from '@expo/vector-icons';
+import { parentService } from '../services/parentService';
+import { useLanguage } from '../context/LanguageContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Notifications'>;
 };
 
-const INITIAL_NOTIFICATIONS = [
-  {
-    id: 'n1',
-    title: 'Urgent: Follow-up required',
-    body: 'Aarav Mandavi (SAM) missed his bi-weekly Anganwadi check-up in Geedam village.',
-    type: 'followup',
-    timestamp: '2 hours ago',
-    read: false,
-    childId: 'C-8012',
-  },
-  {
-    id: 'n2',
-    title: 'High Occupancy Alert',
-    body: 'Bastar Maharani Hospital NRC has exceeded 85% bed occupancy capacity.',
-    type: 'alert',
-    timestamp: '5 hours ago',
-    read: false,
-  },
-  {
-    id: 'n3',
-    title: 'Referral Request Approved',
-    body: 'Aditya Kashyap has been successfully registered at Raipur NRC Center #07.',
-    type: 'referral',
-    timestamp: '1 day ago',
-    read: true,
-    childId: 'C-3902',
-  },
-  {
-    id: 'n4',
-    title: 'MAM Review Scheduled',
-    body: 'Pooja Netam is due for a MUAC assessment review this Friday.',
-    type: 'followup',
-    timestamp: '2 days ago',
-    read: true,
-    childId: 'C-4091',
-  },
-  {
-    id: 'n5',
-    title: 'Disbursement Complete',
-    body: '₹12L fund distribution for nutritional milk packages cleared for Bastar district.',
-    type: 'alert',
-    timestamp: '3 days ago',
-    read: true,
-  },
-];
+interface Notification {
+  id: string;
+  title: string;
+  body: string;
+  type: string;
+  timestamp: string;
+  read: boolean;
+  childId?: string;
+}
 
 const TABS = ['All', 'Followups', 'Alerts', 'NRC Referrals'];
 
 export const NotificationCenterScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { t, locale } = useLanguage();
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
 
-  const handleMarkAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    Alert.alert('Success', 'All notifications marked as read');
+  const fetchAlerts = async () => {
+    try {
+      setLoading(true);
+      const dbAlerts = await parentService.getMyAlerts();
+      const mapped: Notification[] = dbAlerts.map((a: any) => {
+        let type = 'alert';
+        if (a.alert_type === 'sam_detected' || a.alert_type === 'mam_detected' || a.alert_type === 'missed_followup') {
+          type = 'followup';
+        } else if (a.alert_type === 'referral_urgent') {
+          type = 'referral';
+        }
+        
+        // Relative or formatted date
+        const dateObj = new Date(a.created_at || a.sent_at || Date.now());
+        const formattedDate = dateObj.toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        return {
+          id: a._id || Math.random().toString(),
+          title: a.title || 'Malnutrition Alert',
+          body: a.message || '',
+          type,
+          timestamp: formattedDate,
+          read: a.status === 'read', // backend status
+          childId: a.data?.child_id
+        };
+      });
+      setNotifications(mapped);
+    } catch (err: any) {
+      console.error(err);
+      Alert.alert('Error', 'Failed to retrieve recent alerts');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAlerts();
+  }, []);
+
+  const handleMarkAllRead = async () => {
+    if (loading) return;
+    try {
+      setLoading(true);
+      await parentService.markAllAlertsAsRead();
+      await fetchAlerts();
+      Alert.alert(t('successLabel') || 'Success', t('allNotificationsMarkedRead'));
+    } catch (err: any) {
+      console.error(err);
+      Alert.alert('Error', 'Failed to update notifications');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClearNotifications = () => {
+    if (loading) return;
     Alert.alert(
-      'Clear Notifications',
-      'Are you sure you want to delete all notification records?',
+      t('clearNotifications'),
+      t('confirmDeleteAllNotifications'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear All', style: 'destructive', onPress: () => setNotifications([]) },
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('clearAll'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await parentService.clearAllAlerts();
+              setNotifications([]);
+            } catch (err) {
+              console.error(err);
+              Alert.alert('Error', 'Failed to clear notifications');
+            } finally {
+              setLoading(false);
+            }
+          }
+        },
       ]
     );
   };
 
-  const handleToggleRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n))
-    );
+  const handleToggleRead = async (id: string) => {
+    try {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: !n.read } : n))
+      );
+      await parentService.markAlertAsRead(id);
+    } catch (err) {
+      console.error('Failed to mark alert as read in DB:', err);
+    }
   };
 
-  const handleDismiss = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  const handleDismiss = async (id: string) => {
+    try {
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      await parentService.deleteAlert(id);
+    } catch (err) {
+      console.error('Failed to delete alert from DB:', err);
+    }
   };
 
-  const handleNotificationPress = (notif: any) => {
-    handleToggleRead(notif.id);
+  const handleNotificationPress = async (notif: any) => {
+    if (!notif.read) {
+      await handleToggleRead(notif.id);
+    }
     if (notif.childId) {
       navigation.navigate('ChildDetail', { childId: notif.childId });
     }
@@ -143,25 +194,28 @@ export const NotificationCenterScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={[styles.flex, { paddingBottom: insets.bottom }]}>
       <HeaderBar
-        title="Notification Center"
-        subtitle={`${notifications.filter((n) => !n.read).length} Unread Notifications`}
+        title={t('notifications')}
+        subtitle={`${notifications.filter((n) => !n.read).length} ${t('unreadNotifications')}`}
         showBack
         onBack={() => navigation.goBack()}
       />
 
       {/* Tabs */}
       <View style={styles.tabBar}>
-        {TABS.map((tab, idx) => (
-          <TouchableOpacity
-            key={tab}
-            style={[styles.tab, activeTab === idx && styles.tabActive]}
-            onPress={() => setActiveTab(idx)}
-          >
-            <Text style={[styles.tabText, activeTab === idx && styles.tabTextActive]}>
-              {tab}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {TABS.map((tab, idx) => {
+          const tabLabel = idx === 0 ? t('all') : idx === 1 ? t('followupsTab') : idx === 2 ? t('alertsTab') : t('nrcReferralsTab');
+          return (
+            <TouchableOpacity
+              key={tab}
+              style={[styles.tab, activeTab === idx && styles.tabActive]}
+              onPress={() => setActiveTab(idx)}
+            >
+              <Text style={[styles.tabText, activeTab === idx && styles.tabTextActive]}>
+                {tabLabel}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* Quick Actions Panel */}
@@ -169,18 +223,23 @@ export const NotificationCenterScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.quickActionsRow}>
           <TouchableOpacity style={styles.quickActionBtn} onPress={handleMarkAllRead}>
             <Ionicons name="checkmark-done" size={14} color={Colors.primary} />
-            <Text style={styles.quickActionText}>Mark all read</Text>
+            <Text style={styles.quickActionText}>{t('markAllRead')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quickActionBtn} onPress={handleClearNotifications}>
             <Ionicons name="trash-outline" size={14} color={Colors.error} />
-            <Text style={[styles.quickActionText, { color: Colors.error }]}>Clear all</Text>
+            <Text style={[styles.quickActionText, { color: Colors.error }]}>{t('clearAllAction')}</Text>
           </TouchableOpacity>
         </View>
       )}
 
       {/* List Container */}
       <ScrollView style={styles.scroll} contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-        {filtered.length === 0 ? (
+        {loading ? (
+          <View style={styles.emptyWrap}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={[styles.emptyTitle, { marginTop: Spacing.sm }]}>Loading alerts...</Text>
+          </View>
+        ) : filtered.length === 0 ? (
           <View style={styles.emptyWrap}>
             <Ionicons name="notifications-off-outline" size={54} color={Colors.textMuted} />
             <Text style={styles.emptyTitle}>All caught up!</Text>

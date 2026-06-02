@@ -2,130 +2,119 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSync } from '../context/SyncContext';
-import { Colors } from '../theme/colors';
 
 export const OfflineIndicator: React.FC = () => {
   const { isOnline, isSyncing, queueSize } = useSync();
   const [slideAnim] = useState(new Animated.Value(0));
-  const [expanded, setExpanded] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    if (!isOnline || isSyncing || queueSize > 0) {
-      Animated.timing(slideAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    } else {
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
+    if (isOnline) {
+      setDismissed(false);
     }
-  }, [isOnline, isSyncing, queueSize, slideAnim]);
+  }, [isOnline]);
 
-  if (isOnline && !isSyncing && queueSize === 0) {
+  useEffect(() => {
+    const show = (!isOnline || isSyncing || queueSize > 0) && !dismissed;
+    Animated.timing(slideAnim, {
+      toValue: show ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [isOnline, isSyncing, queueSize, dismissed, slideAnim]);
+
+  if ((isOnline && !isSyncing && queueSize === 0) || dismissed) {
     return null;
   }
 
-  const opacity = slideAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1],
-  });
-
-  const translateY = slideAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-100, 0],
-  });
-
   const getStatus = () => {
     if (isSyncing) {
-      return { text: 'Syncing...', icon: 'sync', color: '#0891B2' };
+      return {
+        title: 'Syncing',
+        desc: 'Updating local health records…',
+        icon: 'sync',
+        bgColor: '#ECFEFF',
+        borderColor: '#A5F3FC',
+        textColor: '#0891B2',
+      };
     }
     if (!isOnline) {
-      return { text: 'Offline Mode', icon: 'wifi-off-outline', color: Colors.error };
+      return {
+        title: 'Offline Mode',
+        desc: 'Some features may be unavailable.',
+        icon: 'warning-outline',
+        bgColor: '#FEF2F2',
+        borderColor: '#FEE2E2',
+        textColor: '#EF4444',
+      };
     }
     if (queueSize > 0) {
-      return { text: `${queueSize} pending`, icon: 'cloud-upload-outline', color: '#D97706' };
+      return {
+        title: 'Pending changes',
+        desc: `${queueSize} updates queued for server upload`,
+        icon: 'cloud-upload-outline',
+        bgColor: '#FFFBEB',
+        borderColor: '#FEF3C7',
+        textColor: '#D97706',
+      };
     }
-    return { text: 'Online', icon: 'checkmark-circle', color: Colors.success };
+    return null;
   };
 
   const status = getStatus();
+  if (!status) return null;
+
+  const translateY = slideAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-60, 0],
+  });
 
   return (
-    <Animated.View style={[styles.container, { opacity, transform: [{ translateY }] }]}>
-      <TouchableOpacity style={[styles.indicator, { backgroundColor: status.color + '15', borderColor: status.color }]} onPress={() => setExpanded(!expanded)}>
-        <Ionicons name={status.icon as any} size={16} color={status.color} />
-        <Text style={[styles.text, { color: status.color }]}>{status.text}</Text>
-        {queueSize > 0 && <View style={[styles.badge, { backgroundColor: status.color }]}><Text style={styles.badgeText}>{queueSize}</Text></View>}
-      </TouchableOpacity>
-      {expanded && queueSize > 0 && (
-        <View style={styles.details}>
-          <Text style={styles.detailsText}>{queueSize} requests waiting to sync</Text>
-          <Text style={styles.detailsSubtext}>They will sync automatically when you're online</Text>
+    <Animated.View style={[styles.container, { transform: [{ translateY }], opacity: slideAnim }]}>
+      <View style={[styles.banner, { backgroundColor: status.bgColor, borderColor: status.borderColor }]}>
+        <Ionicons name={status.icon as any} size={14} color={status.textColor} />
+        <View style={styles.textContainer}>
+          <Text style={[styles.titleText, { color: status.textColor }]}>⚠ {status.title}</Text>
+          <Text style={[styles.descText, { color: status.textColor }]}> — {status.desc}</Text>
         </View>
-      )}
+        <TouchableOpacity style={styles.closeBtn} onPress={() => setDismissed(true)}>
+          <Ionicons name="close" size={15} color={status.textColor} />
+        </TouchableOpacity>
+      </View>
     </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    width: '100%',
+    zIndex: 999,
   },
-  indicator: {
+  banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-
     paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  text: {
-    fontSize: 12,
-
-    fontWeight: '700',
-    flex: 1,
-  },
-  badge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: 'white',
-  },
-  details: {
-    marginTop: 8,
-    paddingHorizontal: 12,
     paddingVertical: 8,
-
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderBottomWidth: 1,
+    gap: 8,
   },
-  detailsText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.textPrimary,
+  textContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
   },
-  detailsSubtext: {
+  titleText: {
     fontSize: 11,
-    color: Colors.textSecondary,
-    marginTop: 4,
+    fontWeight: '700',
+  },
+  descText: {
+    fontSize: 11,
+    fontWeight: '500',
+    opacity: 0.9,
+  },
+  closeBtn: {
+    padding: 2,
+    marginLeft: 4,
   },
 });

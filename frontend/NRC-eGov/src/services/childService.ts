@@ -97,50 +97,49 @@ const getStoredChildren = async () => {
   return INITIAL_MOCK_CHILDREN;
 };
 
+const convertDDMMYYYYToISO = (dateStr: string) => {
+  if (!dateStr) return new Date().toISOString();
+  const parts = dateStr.split('/');
+  if (parts.length === 3) {
+    const day = parts[0];
+    const month = parts[1];
+    const year = parts[2];
+    return `${year}-${month}-${day}T00:00:00.000Z`;
+  }
+  return new Date(dateStr).toISOString();
+};
+
 export const childService = {
-  // Register new child (mock)
+  // Register new child via API
   registerChild: async (childData: any) => {
-    await delay(1200);
-    const list = await getStoredChildren();
+    const token = await AsyncStorage.getItem('accessToken');
+    const isoDob = convertDDMMYYYYToISO(childData.dob);
 
-    // Auto-predict status if missing
-    let status = childData.healthStatus || 'Healthy';
-    const muacVal = parseFloat(childData.muac);
-    if (!isNaN(muacVal)) {
-      if (muacVal < 115) status = 'SAM';
-      else if (muacVal < 125) status = 'MAM';
-      else status = 'Healthy';
-    }
-
-    const newChild = {
-      child_id: `C-${Math.floor(1000 + Math.random() * 9000)}`,
+    const payload = {
       name: childData.childName,
-      dob: childData.dob,
-      gender: childData.gender,
+      dob: isoDob,
+      gender: childData.gender === 'Male' ? 'M' : childData.gender === 'Female' ? 'F' : 'O',
       mother_name: childData.motherName,
       mother_phone: childData.mobile || '9876543210',
       village: childData.village || 'N/A',
       district: childData.district || 'Raipur',
       weight: parseFloat(childData.weight) || 0,
       height: parseFloat(childData.height) || 0,
-      muac: muacVal || 0,
-      health_status: status,
-      last_screening_date: new Date().toISOString().split('T')[0],
-      nrc_assigned: 'Not assigned',
-      growth_history: [
-        {
-          date: new Date().toISOString().split('T')[0],
-          weight: parseFloat(childData.weight) || 0,
-          height: parseFloat(childData.height) || 0,
-          muac: muacVal || 0,
-          status: status,
-        }
-      ],
+      muac: parseFloat(childData.muac) || 0,
+      request_id: childData.request_id,
     };
 
-    const updated = [newChild, ...list];
-    await AsyncStorage.setItem('cachedChildren', JSON.stringify(updated));
-    return newChild;
+    const response = await client.post(
+      '/api/children/register',
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
   },
 
   // Screen child and predict status (mock)

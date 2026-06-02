@@ -5,19 +5,26 @@ This script initializes MongoDB with sample data for testing and development
 
 import asyncio
 from datetime import datetime, timedelta
-from motor.motor_asyncio import AsyncClient
+from motor.motor_asyncio import AsyncIOMotorClient
 from app.config import settings
 
 async def seed_database():
     """Seed MongoDB with initial data"""
-    client = AsyncClient(settings.mongodb_url)
+    client = AsyncIOMotorClient(settings.mongodb_url)
     db = client[settings.database_name]
     
     print("🌱 Seeding database...")
     
     try:
         # Clear existing data (development only!)
-        # db.drop_database()
+        await db.nrc_centers.delete_many({})
+        await db.children.delete_many({})
+        await db.users.delete_many({})
+        await db.admissions.delete_many({})
+        await db.funds.delete_many({})
+        await db.alerts.delete_many({})
+        await db.otps.delete_many({})
+        print("✓ Cleared existing database collections")
         
         # 1. Create NRC Centers
         nrc_centers = [
@@ -96,95 +103,118 @@ async def seed_database():
             {
                 "child_id": "CHILD_001",
                 "name": "Aditya Sharma",
-                "dob": datetime(2021, 3, 15),
+                "dob": datetime(2023, 3, 15),
                 "gender": "M",
                 "mother_name": "Geeta Sharma",
                 "mother_phone": "9876543210",
                 "village": "Raigaon",
                 "district": "Raipur",
-                "weight": 12.5,
-                "height": 85,
-                "muac": 12.5,
+                "weight": 8.2,
+                "height": 80.0,
+                "muac": 112.0,
                 "health_status": "sam",
                 "nrc_assigned": "NRC_RAIPUR_01",
                 "last_screening_date": datetime.utcnow() - timedelta(days=2),
                 "next_followup_date": datetime.utcnow() + timedelta(days=13),
+                "growth_history": [
+                    {"date": "2026-03-15", "weight": 9.4, "height": 79.0, "muac": 124.0, "status": "healthy"},
+                    {"date": "2026-04-15", "weight": 8.9, "height": 79.5, "muac": 118.0, "status": "mam"},
+                    {"date": "2026-05-15", "weight": 8.2, "height": 80.0, "muac": 112.0, "status": "sam"}
+                ],
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow()
             },
             {
                 "child_id": "CHILD_002",
                 "name": "Priya Singh",
-                "dob": datetime(2021, 6, 20),
+                "dob": datetime(2024, 6, 20),
                 "gender": "F",
                 "mother_name": "Anjali Singh",
                 "mother_phone": "9876543211",
                 "village": "Abhanpur",
                 "district": "Raipur",
-                "weight": 15.5,
-                "height": 87,
-                "muac": 14.2,
+                "weight": 7.4,
+                "height": 72.0,
+                "muac": 120.0,
                 "health_status": "mam",
                 "nrc_assigned": None,
                 "last_screening_date": datetime.utcnow() - timedelta(days=5),
                 "next_followup_date": datetime.utcnow() + timedelta(days=10),
+                "growth_history": [
+                    {"date": "2026-04-20", "weight": 7.8, "height": 71.0, "muac": 124.0, "status": "healthy"},
+                    {"date": "2026-05-20", "weight": 7.4, "height": 72.0, "muac": 120.0, "status": "mam"}
+                ],
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow()
             },
             {
                 "child_id": "CHILD_003",
                 "name": "Ravi Kumar",
-                "dob": datetime(2020, 12, 8),
+                "dob": datetime(2023, 12, 8),
                 "gender": "M",
                 "mother_name": "Lakshmi Devi",
                 "mother_phone": "9876543212",
                 "village": "Kharora",
                 "district": "Raipur",
-                "weight": 18.2,
-                "height": 95,
-                "muac": 15.8,
+                "weight": 11.2,
+                "height": 84.0,
+                "muac": 135.0,
                 "health_status": "healthy",
                 "nrc_assigned": None,
                 "last_screening_date": datetime.utcnow() - timedelta(days=15),
                 "next_followup_date": datetime.utcnow() + timedelta(days=15),
+                "growth_history": [
+                    {"date": "2026-03-08", "weight": 10.5, "height": 82.0, "muac": 132.0, "status": "healthy"},
+                    {"date": "2026-04-08", "weight": 10.8, "height": 83.0, "muac": 133.0, "status": "healthy"},
+                    {"date": "2026-05-08", "weight": 11.2, "height": 84.0, "muac": 135.0, "status": "healthy"}
+                ],
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow()
             },
             {
                 "child_id": "CHILD_004",
                 "name": "Maya Verma",
-                "dob": datetime(2021, 8, 2),
+                "dob": datetime(2023, 8, 2),
                 "gender": "F",
                 "mother_name": "Sunita Verma",
                 "mother_phone": "9876543213",
                 "village": "Dongargarh",
                 "district": "Bilaspur",
-                "weight": 13.8,
-                "height": 84,
-                "muac": 13.1,
+                "weight": 8.0,
+                "height": 78.0,
+                "muac": 114.0,
                 "health_status": "sam",
                 "nrc_assigned": "NRC_BILASPUR_01",
                 "last_screening_date": datetime.utcnow() - timedelta(days=1),
                 "next_followup_date": datetime.utcnow() + timedelta(days=14),
+                "growth_history": [
+                    {"date": "2026-03-02", "weight": 9.2, "height": 77.0, "muac": 122.0, "status": "healthy"},
+                    {"date": "2026-04-02", "weight": 8.6, "height": 77.5, "muac": 117.0, "status": "mam"},
+                    {"date": "2026-05-02", "weight": 8.0, "height": 78.0, "muac": 114.0, "status": "sam"}
+                ],
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow()
             },
             {
                 "child_id": "CHILD_005",
                 "name": "Rahul Patel",
-                "dob": datetime(2021, 1, 25),
+                "dob": datetime(2023, 1, 25),
                 "gender": "M",
                 "mother_name": "Pooja Patel",
-                "mother_phone": "9876543214",
+                "mother_phone": "9876543210",
                 "village": "Bhilai",
                 "district": "Durg",
-                "weight": 14.2,
-                "height": 86,
-                "muac": 13.5,
+                "weight": 9.1,
+                "height": 82.0,
+                "muac": 122.0,
                 "health_status": "mam",
                 "nrc_assigned": None,
                 "last_screening_date": datetime.utcnow() - timedelta(days=7),
                 "next_followup_date": datetime.utcnow() + timedelta(days=8),
+                "growth_history": [
+                    {"date": "2026-04-25", "weight": 9.5, "height": 81.5, "muac": 126.0, "status": "healthy"},
+                    {"date": "2026-05-25", "weight": 9.1, "height": 82.0, "muac": 122.0, "status": "mam"}
+                ],
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow()
             }
@@ -355,6 +385,42 @@ async def seed_database():
         
         await db.funds.insert_many(funds)
         print(f"✓ Created {len(funds)} fund allocations")
+        
+        # Create sample alerts
+        import os
+        alerts = [
+            {
+                "recipient_phone": "9876543210",
+                "recipient_id": None,
+                "recipient_role": "parent",
+                "alert_type": "sam_detected",
+                "title": "🚨 URGENT: Aditya Sharma (SAM)",
+                "message": "Aditya Sharma has been identified with Severe Acute Malnutrition (SAM). He has been referred and admitted to Raipur Main NRC for therapeutic treatment.",
+                "data": {"child_id": "CHILD_001"},
+                "status": "sent",
+                "delivery_channel": "sms",
+                "created_at": datetime.utcnow() - timedelta(days=2),
+                "sent_at": datetime.utcnow() - timedelta(days=2),
+                "delivery_id": "SM" + os.urandom(16).hex()
+            },
+            {
+                "recipient_phone": "9876543210",
+                "recipient_id": None,
+                "recipient_role": "parent",
+                "alert_type": "mam_detected",
+                "title": "⚠️ Growth Alert: Rahul Patel (MAM)",
+                "message": "Rahul Patel has been identified with Moderate Acute Malnutrition (MAM). Please collect 2 packets of RUTF daily from your assigned Anganwadi center.",
+                "data": {"child_id": "CHILD_005"},
+                "status": "sent",
+                "delivery_channel": "sms",
+                "created_at": datetime.utcnow() - timedelta(days=7),
+                "sent_at": datetime.utcnow() - timedelta(days=7),
+                "delivery_id": "SM" + os.urandom(16).hex()
+            }
+        ]
+        
+        await db.alerts.insert_many(alerts)
+        print(f"✓ Created {len(alerts)} sample alerts")
         
         # 6. Create indexes
         await db.children.create_index([("child_id", 1)], unique=True)

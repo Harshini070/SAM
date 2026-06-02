@@ -24,6 +24,7 @@ interface FundCategory {
 interface FundData {
   total_funds?: number;
   spent_funds?: number;
+  funds_utilized?: number;
   recovery_rate?: number;
   district_stats?: any[];
 }
@@ -36,12 +37,8 @@ const CATEGORIES_CONFIG: Omit<FundCategory, 'allocated' | 'utilized' | 'pct'>[] 
   { label: 'Emergency Fund', icon: 'alert-circle-outline', color: Colors.error },
 ];
 
-const TRANSACTIONS = [
-  { id: '1', center: 'NRC Raipur #03', desc: 'Therapeutic Feed Procurement', amount: '₹ 4,50,000', date: '19 May 2025', status: 'Approved' },
-  { id: '2', center: 'NRC Bastar #11', desc: 'Staff Salary Disbursements', amount: '₹ 2,80,000', date: '18 May 2025', status: 'Approved' },
-  { id: '3', center: 'NRC Durg #07', desc: 'Medical Kit Procurement', amount: '₹ 1,50,000', date: '15 May 2025', status: 'Pending' },
-  { id: '4', center: 'NRC Bilaspur #02', desc: 'Bed Repair & Maintenance', amount: '₹ 85,000', date: '12 May 2025', status: 'Approved' },
-];
+// Transactions are loaded dynamically; empty array until backend returns data.
+const EMPTY_TRANSACTIONS: any[] = [];
 
 export const FundManagementScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
@@ -54,17 +51,26 @@ export const FundManagementScreen: React.FC = () => {
     try {
       const data = await analyticsService.getDashboard();
       setFundData(data);
-      
-      // Create dummy category data from total funds
-      const total = data.total_funds || 240;
-      const spent = data.spent_funds || 162;
-      const catData = CATEGORIES_CONFIG.map((cat, idx) => ({
-        ...cat,
-        allocated: Math.round((total / 5) * (1 + (idx * 0.1))),
-        utilized: Math.round(((total / 5) * (1 + (idx * 0.1))) * (0.3 + (idx * 0.1))),
-        pct: Math.round(((total / 5) * (1 + (idx * 0.1))) * (0.3 + (idx * 0.1)) / ((total / 5) * (1 + (idx * 0.1))) * 100),
-      }));
-      setCategories(catData);
+
+      // Build category data only if real fund data exists
+      const total = data.total_funds || 0;
+      const spent = data.funds_utilized || 0;
+      if (total > 0) {
+        const overallPct = spent / total;
+        const catData = CATEGORIES_CONFIG.map((cat, idx) => {
+          const allocShare = (total / 5) * (1 + idx * 0.1);
+          const utilShare = allocShare * Math.min(overallPct * (1 + idx * 0.05), 1);
+          return {
+            ...cat,
+            allocated: Math.round(allocShare),
+            utilized: Math.round(utilShare),
+            pct: Math.round((utilShare / allocShare) * 100),
+          };
+        });
+        setCategories(catData);
+      } else {
+        setCategories([]);
+      }
     } catch (err) {
       console.error('Failed to fetch fund data:', err);
     } finally {
@@ -82,9 +88,9 @@ export const FundManagementScreen: React.FC = () => {
     fetchFundData();
   };
 
-  const totalAllocated = fundData?.total_funds || 240;
-  const totalUtilized = fundData?.spent_funds || 162;
-  const utilizationPct = Math.round((totalUtilized / totalAllocated) * 100);
+  const totalAllocated = fundData?.total_funds || 0;
+  const totalUtilized = fundData?.funds_utilized || 0;
+  const utilizationPct = totalAllocated > 0 ? Math.round((totalUtilized / totalAllocated) * 100) : 0;
 
   return (
     <View style={[styles.flex, { paddingBottom: insets.bottom }]}>
@@ -158,11 +164,18 @@ export const FundManagementScreen: React.FC = () => {
           {/* Transactions */}
           <View style={styles.rowBetween}>
             <Text style={styles.sectionTitle}>Recent Disbursements</Text>
-            <TouchableOpacity><Text style={styles.seeAll}>History</Text></TouchableOpacity>
           </View>
           <View style={styles.card}>
-            {TRANSACTIONS.map((t, idx) => (
-              <View key={t.id} style={[styles.transRow, idx < TRANSACTIONS.length - 1 && styles.rowBorder]}>
+            {EMPTY_TRANSACTIONS.length === 0 ? (
+              <View style={styles.emptyTrans}>
+                <Ionicons name="receipt-outline" size={32} color={Colors.textMuted} />
+                <Text style={styles.emptyTransTitle}>No Transactions Yet</Text>
+                <Text style={styles.emptyTransSub}>
+                  Fund disbursement records will appear here once NRC transactions are logged.
+                </Text>
+              </View>
+            ) : EMPTY_TRANSACTIONS.map((t, idx) => (
+              <View key={t.id} style={[styles.transRow, idx < EMPTY_TRANSACTIONS.length - 1 && styles.rowBorder]}>
                 <View style={styles.transLeft}>
                   <Text style={styles.transCenter}>{t.center}</Text>
                   <Text style={styles.transDesc}>{t.desc}</Text>
@@ -186,6 +199,9 @@ export const FundManagementScreen: React.FC = () => {
 const styles = StyleSheet.create({
 
   flex: { flex: 1, backgroundColor: Colors.background },
+  emptyTrans: { alignItems: 'center', paddingVertical: 24, gap: 8 },
+  emptyTransTitle: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary, marginTop: 4 },
+  emptyTransSub: { fontSize: 11, color: Colors.textSecondary, textAlign: 'center', lineHeight: 16, fontWeight: '500', paddingHorizontal: 8 },
   centerLoader: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loadingText: { fontSize: 12, color: Colors.textMuted, marginTop: 12, fontWeight: '600' },
   noData: { fontSize: 12, color: Colors.textMuted, textAlign: 'center', marginTop: 24 },

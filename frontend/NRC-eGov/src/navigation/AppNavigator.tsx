@@ -28,6 +28,7 @@ import { Colors } from '../theme/colors';
 import { Spacing } from '../theme/spacing';
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -37,6 +38,7 @@ const TAB_ICONS: Record<string, string> = {
   Children: 'people-outline',
   NRCCenters: 'business-outline',
   Funds: 'bar-chart-outline',
+  Notifications: 'notifications-outline',
   Profile: 'person-circle-outline',
 };
 
@@ -45,10 +47,12 @@ const TAB_ACTIVE: Record<string, string> = {
   Children: 'people',
   NRCCenters: 'business',
   Funds: 'bar-chart',
+  Notifications: 'notifications',
   Profile: 'person-circle',
 };
 
 function MitaninTabs() {
+  const { t } = useLanguage();
   return (
     <View style={styles.mainTabsContainer}>
       <OfflineIndicator />
@@ -66,16 +70,17 @@ function MitaninTabs() {
           },
         })}
       >
-        <Tab.Screen name="Dashboard" component={MitaninDashboardScreen} options={{ title: 'Home' }} />
-        <Tab.Screen name="Children" component={ChildrenListScreen} options={{ title: 'Children' }} />
-        <Tab.Screen name="Notifications" component={NotificationCenterScreen} options={{ title: 'Alerts' }} />
-        <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
+        <Tab.Screen name="Dashboard" component={MitaninDashboardScreen} options={{ title: t('dashboard') }} />
+        <Tab.Screen name="Children" component={ChildrenListScreen} options={{ title: t('children') }} />
+        <Tab.Screen name="Notifications" component={NotificationCenterScreen} options={{ title: t('notifications') }} />
+        <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: t('profile') }} />
       </Tab.Navigator>
     </View>
   );
 }
 
 function ParentTabs() {
+  const { t } = useLanguage();
   return (
     <View style={styles.mainTabsContainer}>
       <OfflineIndicator />
@@ -93,16 +98,17 @@ function ParentTabs() {
           },
         })}
       >
-        <Tab.Screen name="Dashboard" component={ParentDashboardScreen} options={{ title: 'Home' }} />
-        <Tab.Screen name="Children" component={ChildrenListScreen} options={{ title: 'Children' }} />
-        <Tab.Screen name="Notifications" component={NotificationCenterScreen} options={{ title: 'Alerts' }} />
-        <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
+        <Tab.Screen name="Dashboard" component={ParentDashboardScreen} options={{ title: t('dashboard') }} />
+        <Tab.Screen name="Children" component={ChildrenListScreen} options={{ title: t('children') }} />
+        <Tab.Screen name="Notifications" component={NotificationCenterScreen} options={{ title: t('notifications') }} />
+        <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: t('profile') }} />
       </Tab.Navigator>
     </View>
   );
 }
 
 function AdminTabs() {
+  const { t } = useLanguage();
   return (
     <View style={styles.mainTabsContainer}>
       <OfflineIndicator />
@@ -120,10 +126,10 @@ function AdminTabs() {
           },
         })}
       >
-        <Tab.Screen name="Dashboard" component={AdminDashboardScreen} options={{ title: 'Home' }} />
-        <Tab.Screen name="Reports" component={ReportsScreen} options={{ title: 'Reports' }} />
-        <Tab.Screen name="Funds" component={FundManagementScreen} options={{ title: 'Funds' }} />
-        <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
+        <Tab.Screen name="Dashboard" component={AdminDashboardScreen} options={{ title: t('dashboard') }} />
+        <Tab.Screen name="Reports" component={ReportsScreen} options={{ title: t('reports') }} />
+        <Tab.Screen name="Funds" component={FundManagementScreen} options={{ title: t('funds') }} />
+        <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: t('profile') }} />
       </Tab.Navigator>
     </View>
   );

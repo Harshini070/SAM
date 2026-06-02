@@ -1,5 +1,6 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { client } from '../api/client';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -74,81 +75,88 @@ const getStoredCenters = async () => {
 };
 
 export const nrcService = {
-  // Get all NRC centers (mock)
+  // Get all NRC centers (from API)
   getAllCenters: async (district?: string) => {
-    await delay(900);
-    const list = await getStoredCenters();
-    if (district && district !== 'All Districts') {
-      return list.filter((c: any) => c.district.toLowerCase() === district.toLowerCase());
-    }
-    return list;
-  },
-
-  // Get specific NRC center (mock)
-  getCenter: async (nrcId: string) => {
-    await delay(500);
-    const list = await getStoredCenters();
-    const center = list.find((c: any) => c.nrc_id === nrcId);
-    if (!center) throw new Error('NRC Center not found');
-    return { data: center };
-  },
-
-  // Get NRC occupancy (mock)
-  getOccupancy: async (nrcId: string) => {
-    await delay(400);
-    const list = await getStoredCenters();
-    const center = list.find((c: any) => c.nrc_id === nrcId);
-    if (!center) throw new Error('NRC Center not found');
-    return {
-      nrc_id: nrcId,
-      total_beds: center.total_beds,
-      occupied_beds: center.occupied_beds,
-      occupancy_percentage: Math.round((center.occupied_beds / center.total_beds) * 100),
-    };
-  },
-
-  // Find nearest NRC with beds (mock)
-  getNearestNRC: async (latitude: number, longitude: number) => {
-    await delay(800);
-    const list = await getStoredCenters();
-    // Return first center that has space
-    const available = list.find((c: any) => c.occupied_beds < c.total_beds);
-    return { data: available || list[0] };
-  },
-
-  // Admit child to NRC (mock)
-  admitChild: async (admissionData: any) => {
-    await delay(1200);
-    const list = await getStoredCenters();
-    const updated = list.map((c: any) => {
-      if (c.nrc_id === admissionData.nrc_id) {
-        return { ...c, occupied_beds: Math.min(c.total_beds, c.occupied_beds + 1) };
-      }
-      return c;
+    const token = await AsyncStorage.getItem('accessToken');
+    const response = await client.get('/api/nrc/centers', {
+      params: district && district !== 'All Districts' ? { district } : {},
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
-    await AsyncStorage.setItem('cachedNRCCenters', JSON.stringify(updated));
-    
-    // Also update the child assigned NRC in cachedChildren
-    const childrenStr = await AsyncStorage.getItem('cachedChildren');
-    if (childrenStr) {
-      const children = JSON.parse(childrenStr);
-      const childCenter = list.find((c: any) => c.nrc_id === admissionData.nrc_id);
-      const updatedChildren = children.map((ch: any) => {
-        if (ch.child_id === admissionData.child_id) {
-          return { ...ch, nrc_assigned: childCenter ? childCenter.name : 'Assigned' };
-        }
-        return ch;
-      });
-      await AsyncStorage.setItem('cachedChildren', JSON.stringify(updatedChildren));
-    }
-
-    return { success: true, message: 'Child admitted successfully' };
+    return response.data.centers;
   },
 
-  // Update admission status (mock)
+  // Get specific NRC center (from API)
+  getCenter: async (nrcId: string) => {
+    const token = await AsyncStorage.getItem('accessToken');
+    const response = await client.get(`/api/nrc/centers/${nrcId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return { data: response.data };
+  },
+
+  // Get NRC occupancy (from API)
+  getOccupancy: async (nrcId: string) => {
+    const token = await AsyncStorage.getItem('accessToken');
+    const response = await client.get(`/api/nrc/centers/${nrcId}/occupancy`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  },
+
+  // Find nearest NRC with beds (from API)
+  getNearestNRC: async (latitude: number, longitude: number) => {
+    const token = await AsyncStorage.getItem('accessToken');
+    const response = await client.get('/api/nrc/nearest', {
+      params: { latitude, longitude },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return { data: response.data };
+  },
+
+  // Admit child to NRC (from API)
+  admitChild: async (admissionData: any) => {
+    const token = await AsyncStorage.getItem('accessToken');
+    const response = await client.post(
+      '/api/nrc/admit',
+      {
+        child_id: admissionData.child_id,
+        nrc_id: admissionData.nrc_id,
+        treatment_notes: admissionData.treatment_notes || 'Referred for treatment',
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  },
+
+  // Update admission status (from API)
   updateAdmission: async (admissionId: string, updateData: any) => {
-    await delay(800);
-    return { success: true, message: 'Admission status updated' };
+    const token = await AsyncStorage.getItem('accessToken');
+    const response = await client.put(
+      `/api/nrc/admissions/${admissionId}`,
+      {
+        status: updateData.status,
+        recovery_percentage: updateData.recovery_percentage,
+        treatment_notes: updateData.treatment_notes,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
   },
 
   // Cache NRC centers (mock)
@@ -158,6 +166,16 @@ export const nrcService = {
 
   // Get cached centers (mock)
   getCachedCenters: async () => {
-    return getStoredCenters();
+    const token = await AsyncStorage.getItem('accessToken');
+    try {
+      const response = await client.get('/api/nrc/centers', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data.centers;
+    } catch {
+      return getStoredCenters();
+    }
   },
 };

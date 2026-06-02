@@ -10,6 +10,7 @@ import { InputField } from '../../components/InputField';
 import { Colors } from '../../theme/colors';
 import { Spacing, Radius } from '../../theme/spacing';
 import { Typography } from '../../theme/typography';
+import { useLanguage } from '../../context/LanguageContext';
 
 type OTPParams = RouteProp<RootStackParamList, 'OTPVerification'>;
 
@@ -20,6 +21,7 @@ type Props = {
 
 export const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
   const [phone, setPhone] = useState(route.params?.phone || '');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
@@ -30,25 +32,27 @@ export const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) =>
   const selectedRole = route.params?.role || 'Parent';
 
   const handleSendOTP = async () => {
+    if (loading) return;
     if (!phone || phone.length !== 10) {
-      setError('Enter a valid 10-digit mobile number');
+      setError(t('phoneRequired'));
       return;
     }
     setLoading(true);
     setError('');
     try {
       setOtpSent(true);
-      Alert.alert('OTP Sent', 'Your verification code has been sent.');
+      Alert.alert(t('otpSentTitle'), t('otpSentMsg'));
     } catch (err: any) {
-      setError(err.message || 'Failed to send OTP');
+      setError(err.message || t('failedSendOtp'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerifyOTP = async () => {
+    if (loading) return;
     if (!otp || otp.length !== 6) {
-      setError('Enter the 4-digit OTP');
+      setError(t('enterOtpCodeError'));
       return;
     }
 
@@ -72,7 +76,7 @@ export const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) =>
       }
 
     } catch (err: any) {
-      setError(err.message || 'OTP verification failed');
+      setError(err.message || t('otpVerificationFailed'));
     } finally {
       setLoading(false);
     }
@@ -80,39 +84,39 @@ export const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) =>
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
-      <Text style={styles.title}>{isRegisterFlow ? 'Verify Mobile Number' : 'Mobile Number Login'}</Text>
-      <Text style={styles.subtitle}>{isRegisterFlow ? 'Enter OTP to continue registration' : 'Receive a one-time code on your mobile'}</Text>
+      <Text style={styles.title}>{isRegisterFlow ? t('verifyMobileNum') : t('mobileNumLogin')}</Text>
+      <Text style={styles.subtitle}>{isRegisterFlow ? t('enterOtpReg') : t('receiveCodeMobile')}</Text>
 
       <View style={styles.card}>
         {!otpSent ? (
           <>
             <InputField
-              label="Mobile Number"
+              label={t('mobileNumber')}
               icon="call-outline"
-              placeholder="10-digit mobile number"
+              placeholder={t('parentMobilePlaceholder')}
               keyboardType="phone-pad"
               value={phone}
               onChangeText={(text) => setPhone(text.replace(/[^0-9]/g, ''))}
               maxLength={10}
               error={error}
             />
-            <Button label="Send OTP" onPress={handleSendOTP} loading={loading} />
+            <Button label={t('sendOtpBtn')} onPress={handleSendOTP} loading={loading} />
           </>
         ) : (
           <>
             <InputField
-              label="Verification Code"
+              label={t('verificationCode')}
               icon="lock-closed-outline"
-              placeholder="Enter 4-digit OTP"
+              placeholder={t('enterOtpPlaceholder')}
               keyboardType="number-pad"
               value={otp}
               onChangeText={(text) => setOtp(text.replace(/[^0-9]/g, ''))}
-              maxLength={4}
+              maxLength={6}
               error={error}
             />
-            <Button label={isRegisterFlow ? 'Verify & Continue' : 'Verify & Login'} onPress={handleVerifyOTP} loading={loading} />
+            <Button label={isRegisterFlow ? t('verifyContinueBtn') : t('verifyLoginBtn')} onPress={handleVerifyOTP} loading={loading} />
             <Button
-              label="Use different number"
+              label={t('useDiffNum')}
               variant="outline"
               onPress={() => {
                 setOtpSent(false);
@@ -126,8 +130,8 @@ export const OTPVerificationScreen: React.FC<Props> = ({ navigation, route }) =>
       </View>
 
       <View style={styles.noteBox}>
-        <Text style={styles.noteTitle}>Secure verification</Text>
-        <Text style={styles.noteText}>OTP is valid only for a short time and is used to protect your account with a trusted government login experience.</Text>
+        <Text style={styles.noteTitle}>{t('secureVerification')}</Text>
+        <Text style={styles.noteText}>{t('otpValidityNote')}</Text>
       </View>
     </View>
   );

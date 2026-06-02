@@ -9,6 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Modal,
+  Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,26 +21,31 @@ import { Colors } from '../../theme/colors';
 import { Spacing, Radius } from '../../theme/spacing';
 import { Typography } from '../../theme/typography';
 import { useAuth } from '../../hooks/useAuth';
+import { useLanguage, LocaleType } from '../../context/LanguageContext';
+import { Ionicons } from '@expo/vector-icons';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
 };
 
+const screenHeight = Dimensions.get('window').height;
+
 export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { login } = useAuth();
+  const { t, locale, setLocale } = useLanguage();
+  
   const [phone, setPhone] = useState('');
-  const [loginType, setLoginType] = useState<'phone' | 'email'>('phone');
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('parent');
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
 
   const handleRequestOTP = async () => {
+    if (loading) return;
     if (!phone || phone.length !== 10) {
-      setError('Please enter a valid phone number');
+      setError(t('phoneRequired'));
       return;
     }
 
@@ -47,29 +54,27 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
     try {
       await authService.requestOTP(phone);
-
       setOtpSent(true);
-
       Alert.alert(
-        'Success',
-        'OTP sent successfully'
+        t('successLabel'),
+        t('otpSentSuccess')
       );
-
     } catch (err: any) {
       const message =
         err?.response?.data?.detail ||
-        'Failed to send OTP';
+        t('failedSendOtp');
 
       setError(message);
-      Alert.alert('Error', message);
+      Alert.alert(t('errorLabel'), message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerifyOTP = async () => {
+    if (loading) return;
     if (!otp || otp.length !== 6) {
-      setError('Please enter a valid OTP');
+      setError(t('otpRequired'));
       return;
     }
     setLoading(true);
@@ -78,9 +83,9 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
       await login(phone, otp);
       navigation.replace('MainTabs');
     } catch (err: any) {
-      const message = err?.response?.data?.detail || 'Invalid OTP';
+      const message = err?.response?.data?.detail || t('invalidOtp');
       setError(message);
-      Alert.alert('Error', message);
+      Alert.alert(t('errorLabel'), message);
     } finally {
       setLoading(false);
     }
@@ -105,10 +110,19 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.emblemPlaceholder}>
             <Text style={styles.emblemText}>🏛️</Text>
           </View>
-          <View>
-            <Text style={styles.govTitle}>Government of Chhattisgarh</Text>
-            <Text style={styles.deptTitle}>NRC e-Governance Portal</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.govTitle}>{t('govCg')}</Text>
+            <Text style={styles.deptTitle}>{t('nrcGovPortal')}</Text>
           </View>
+          <TouchableOpacity 
+            style={styles.langSelectorBtn} 
+            onPress={() => setLanguageModalVisible(true)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="language-outline" size={14} color={Colors.primary} />
+            <Text style={styles.langSelectorText}>{locale.toUpperCase()}</Text>
+            <Ionicons name="chevron-down-outline" size={10} color={Colors.primary} />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.dividerRow}>
@@ -118,51 +132,19 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         </View>
 
         <View style={styles.headingBlock}>
-          <Text style={[Typography.h2, { color: Colors.primary }]}>Welcome!</Text>
+          <Text style={[Typography.h2, { color: Colors.primary }]}>{t('welcome')}</Text>
           <Text style={[Typography.body, { color: Colors.textSecondary, marginTop: 4 }]}>
-            {otpSent ? 'Enter OTP sent to your phone' : 'Login with your phone number'}
+            {otpSent ? t('enterOtpSub') : t('loginPhoneSub')}
           </Text>
-        </View>
-
-        <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              padding: 12,
-              backgroundColor: loginType === 'phone' ? Colors.primary : '#E5E7EB',
-              borderRadius: 10,
-              marginRight: 5,
-            }}
-            onPress={() => setLoginType('phone')}
-          >
-            <Text style={{ textAlign: 'center', color: 'white', fontWeight: '700' }}>
-              Mobile Login
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              padding: 12,
-              backgroundColor: loginType === 'email' ? Colors.primary : '#E5E7EB',
-              borderRadius: 10,
-              marginLeft: 5,
-            }}
-            onPress={() => setLoginType('email')}
-          >
-            <Text style={{ textAlign: 'center', color: 'white', fontWeight: '700' }}>
-              Email Login
-            </Text>
-          </TouchableOpacity>
         </View>
 
         <View style={styles.card}>
           {!otpSent ? (
             <>
               <InputField
-                label='Mobile Number'
+                label={t('mobileNumber')}
                 icon='call-outline'
-                placeholder='Enter your 10-digit mobile number'
+                placeholder={t('enterMobilePlaceholder')}
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType='phone-pad'
@@ -170,14 +152,14 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 editable={!loading}
               />
               {error ? <Text style={styles.errorText}>{error}</Text> : null}
-              <Button label='Request OTP' onPress={handleRequestOTP} loading={loading} style={styles.loginBtn} />
+              <Button label={t('requestOtp')} onPress={handleRequestOTP} loading={loading} style={styles.loginBtn} />
             </>
           ) : (
             <>
               <InputField
-                label='Enter OTP'
+                label={t('enterOtp')}
                 icon='lock-closed-outline'
-                placeholder='Enter 4-digit OTP'
+                placeholder={t('enterOtpPlaceholder')}
                 value={otp}
                 onChangeText={setOtp}
                 keyboardType='numeric'
@@ -185,7 +167,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 editable={!loading}
               />
               {error ? <Text style={styles.errorText}>{error}</Text> : null}
-              <Button label='Verify OTP' onPress={handleVerifyOTP} loading={loading} style={styles.loginBtn} />
+              <Button label={t('verifyOtp')} onPress={handleVerifyOTP} loading={loading} style={styles.loginBtn} />
               <TouchableOpacity
                 onPress={() => {
                   setOtpSent(false);
@@ -193,7 +175,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
                   setError('');
                 }}
               >
-                <Text style={[Typography.label, { color: Colors.primaryLight, textAlign: 'center' }]}>Back to Phone Entry</Text>
+                <Text style={[Typography.label, { color: Colors.primaryLight, textAlign: 'center' }]}>{t('backPhoneEntry')}</Text>
               </TouchableOpacity>
             </>
           )}
@@ -202,15 +184,51 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.securityNote}>
           <Text style={styles.securityIcon}>🔒</Text>
           <Text style={styles.securityText}>
-            This is a secure government portal. Unauthorized access is prohibited.
+            {t('secureGovPortalText')}
           </Text>
         </View>
 
         <View style={styles.bottomCard}>
-          <Text style={styles.bottomText}>Don't have an account?</Text>
-          <Text style={styles.registerLink} onPress={handleRegister}>Create Account</Text>
+          <Text style={styles.bottomText}>{t('dontHaveAccount')}</Text>
+          <Text style={styles.registerLink} onPress={handleRegister}>{t('createAccount')}</Text>
         </View>
       </ScrollView>
+
+      {/* Language picker Modal */}
+      <Modal visible={languageModalVisible} transparent animationType="slide">
+        <View style={styles.modalBackdrop}>
+          <TouchableOpacity style={styles.backdropButton} onPress={() => setLanguageModalVisible(false)} />
+          <View style={styles.modalContent}>
+            <View style={styles.dragIndicator} />
+            <Text style={styles.modalTitle}>{t('langSelector')}</Text>
+
+            {[
+              { code: 'en', label: 'English (EN)' },
+              { code: 'hi', label: 'Hindi (हिंदी)' },
+              { code: 'cg', label: 'Chhattisgarhi (छत्तीसगढ़ी)' }
+            ].map((lang) => (
+              <TouchableOpacity
+                key={lang.code}
+                style={[styles.langItem, locale === lang.code && styles.langItemActive]}
+                onPress={() => setLocale(lang.code as LocaleType)}
+              >
+                <Text style={[styles.langText, locale === lang.code && styles.langTextActive]}>
+                  {lang.label}
+                </Text>
+                {locale === lang.code && <Ionicons name="checkmark-circle" size={16} color={Colors.primary} />}
+              </TouchableOpacity>
+            ))}
+
+            <Button
+              label={t('applyLanguageBtn')}
+              onPress={() => {
+                setLanguageModalVisible(false);
+              }}
+              style={{ marginTop: 24 }}
+            />
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
@@ -224,6 +242,8 @@ const styles = StyleSheet.create({
   emblemText: { fontSize: 26 },
   govTitle: { ...Typography.caption, color: Colors.textSecondary, letterSpacing: 0.5 },
   deptTitle: { ...Typography.label, color: Colors.primary, fontWeight: '700' },
+  langSelectorBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#F1F5F9', borderRadius: Radius.full, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: '#E2E8F0', minHeight: 32 },
+  langSelectorText: { fontSize: 11, fontWeight: '800', color: Colors.primary },
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.lg, gap: Spacing.sm },
   divider: { flex: 1, height: 1, backgroundColor: Colors.border },
   flagDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.accent },
@@ -237,4 +257,14 @@ const styles = StyleSheet.create({
   securityNote: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm, backgroundColor: Colors.offWhite, borderRadius: Radius.md, padding: Spacing.md },
   securityIcon: { fontSize: 14 },
   securityText: { ...Typography.bodySmall, color: Colors.textSecondary, flex: 1 },
+  
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.4)', justifyContent: 'flex-end' },
+  backdropButton: { flex: 1 },
+  modalContent: { backgroundColor: Colors.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 36, maxHeight: screenHeight * 0.85, borderTopWidth: 1, borderTopColor: '#E2E8F0' },
+  dragIndicator: { width: 36, height: 4, borderRadius: 2, backgroundColor: '#CBD5E1', alignSelf: 'center', marginBottom: 16 },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: Colors.primary, marginBottom: 18 },
+  langItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+  langItemActive: { backgroundColor: '#F0F9FF', paddingHorizontal: 10, borderRadius: 10 },
+  langText: { fontSize: 13, color: Colors.textPrimary, fontWeight: '600' },
+  langTextActive: { color: Colors.primary, fontWeight: '800' },
 });

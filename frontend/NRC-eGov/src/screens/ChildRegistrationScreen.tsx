@@ -22,6 +22,9 @@ import { Spacing, Radius } from '../theme/spacing';
 import { Typography } from '../theme/typography';
 
 import { childService } from '../services/childService';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'ChildRegistration'>;
@@ -31,8 +34,19 @@ type Props = {
 const GENDERS = ['Male', 'Female', 'Others'];
 const DISTRICTS = ['Raipur', 'Durg', 'Bastar', 'Bilaspur', 'Rajnandgaon'];
 
+const getStatusColors = (status: string) => {
+  if (status === 'SAM') return { bg: '#FEE2E2', text: '#EF4444' };
+  if (status === 'MAM') return { bg: '#FEF3C7', text: '#D97706' };
+  return { bg: '#E6F4EA', text: '#137333' };
+};
+
 export const ChildRegistrationScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const auth = useContext(AuthContext);
+  const user = auth?.user;
+  const isParent = user?.role === 'parent';
+  const { t } = useLanguage();
+
   const [form, setForm] = useState({
     childName: '',
     dob: '',
@@ -50,6 +64,18 @@ export const ChildRegistrationScreen: React.FC<Props> = ({ navigation }) => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+
+  useEffect(() => {
+    if (isParent && user) {
+      setForm((prev) => ({
+        ...prev,
+        motherName: user.name || '',
+        mobile: user.phone || '',
+        district: user.district || '',
+      }));
+    }
+  }, [user, isParent]);
 
   useEffect(() => {
     const muacValue = parseFloat(form.muac);
@@ -74,43 +100,49 @@ export const ChildRegistrationScreen: React.FC<Props> = ({ navigation }) => {
   const validate = () => {
     const nextErrors: Record<string, string> = {};
 
-    if (!form.childName.trim()) nextErrors.childName = 'Child full name is required';
-    if (!form.dob.trim()) nextErrors.dob = 'Date of birth is required';
-    if (!/^[0-3]\d\/[0-1]\d\/[0-9]{4}$/.test(form.dob)) nextErrors.dob = 'Use DD/MM/YYYY format';
-    if (!form.gender) nextErrors.gender = 'Select gender';
-    if (!form.motherName.trim()) nextErrors.motherName = "Mother's name is required";
-    if (form.mobile && form.mobile.length !== 10) nextErrors.mobile = 'Mobile number must be 10 digits';
-    if (!form.weight.trim()) nextErrors.weight = 'Weight is required';
-    if (!form.height.trim()) nextErrors.height = 'Height is required';
-    if (!form.muac.trim()) nextErrors.muac = 'MUAC is required';
-    if (!form.district.trim()) nextErrors.district = 'District is required';
-    if (!form.anganwadiCode.trim()) nextErrors.anganwadiCode = 'Anganwadi code is required';
-    if (!form.village.trim()) nextErrors.village = 'Village / area is required';
+    if (!form.childName.trim()) nextErrors.childName = t('nameRequired');
+    if (!form.dob.trim()) nextErrors.dob = t('dobRequired');
+    if (!/^[0-3]\d\/[0-1]\d\/[0-9]{4}$/.test(form.dob)) nextErrors.dob = t('dobFormat');
+    if (!form.gender) nextErrors.gender = t('selectGenderError');
+    if (!form.motherName.trim()) nextErrors.motherName = t('motherNameRequired');
+    if (form.mobile && form.mobile.length !== 10) nextErrors.mobile = t('mobileFormat');
+    if (!form.weight.trim()) nextErrors.weight = t('weightRequired');
+    if (!form.height.trim()) nextErrors.height = t('heightRequired');
+    if (!form.muac.trim()) nextErrors.muac = t('muacRequired');
+    if (!form.district.trim()) nextErrors.district = t('districtRequired');
+    if (!form.anganwadiCode.trim()) nextErrors.anganwadiCode = t('anganwadiRequired');
+    if (!form.village.trim()) nextErrors.village = t('villageRequired');
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
 
   const handleRegister = async () => {
+    if (loading || registrationSuccess) return;
     if (!validate()) return;
     setLoading(true);
     try {
-      await childService.registerChild(form);
+      const requestId = 'req_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+      const child = await childService.registerChild({ ...form, request_id: requestId });
+      setRegistrationSuccess(true);
       setLoading(false);
-      Alert.alert('Registration Complete', 'Child record has been added.', [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      Alert.alert(t('regComplete'), t('regCompleteDesc'));
+      if (child && child.child_id) {
+        navigation.replace('ChildDetail', { childId: child.child_id });
+      } else {
+        navigation.goBack();
+      }
     } catch (error: any) {
       setLoading(false);
-      Alert.alert('Registration Failed', error?.message || 'Unable to save child record.');
+      Alert.alert(t('regFailed'), error?.message || t('regFailedDesc'));
     }
   };
 
   return (
     <View style={[styles.flex, { paddingBottom: insets.bottom }]}> 
       <HeaderBar
-        title="Child Registration"
-        subtitle="SAM intake form"
+        title={t('childRegistrationTitle')}
+        subtitle={t('samIntakeForm')}
         showBack
         onBack={() => navigation.goBack()}
       />
@@ -127,25 +159,25 @@ export const ChildRegistrationScreen: React.FC<Props> = ({ navigation }) => {
         >
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Child Information</Text>
+            <Text style={styles.sectionTitle}>{t('childInfo')}</Text>
             <InputField
-              label="Child Full Name"
+              label={t('childFullName')}
               icon="person-outline"
-              placeholder="Enter child full name"
+              placeholder={t('enterChildName')}
               value={form.childName}
               onChangeText={(value) => update('childName', value)}
               error={errors.childName}
             />
             <InputField
-              label="Date of Birth"
+              label={t('dob')}
               icon="calendar-outline"
-              placeholder="DD/MM/YYYY"
+              placeholder={t('dobPlaceholder')}
               value={form.dob}
               onChangeText={(value) => update('dob', value)}
               keyboardType="numeric"
               error={errors.dob}
             />
-            <Text style={styles.pickerLabel}>Gender</Text>
+            <Text style={styles.pickerLabel}>{t('gender')}</Text>
             <View style={styles.genderRow}>
               {GENDERS.map((gender) => (
                 <TouchableOpacity
@@ -157,7 +189,7 @@ export const ChildRegistrationScreen: React.FC<Props> = ({ navigation }) => {
                   onPress={() => update('gender', gender)}
                 >
                   <Text style={[styles.genderButtonText, form.gender === gender && styles.genderActiveText]}>
-                    {gender}
+                    {gender === 'Male' ? t('male') : gender === 'Female' ? t('female') : t('others')}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -166,30 +198,32 @@ export const ChildRegistrationScreen: React.FC<Props> = ({ navigation }) => {
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Measurements</Text>
+            <Text style={styles.sectionTitle}>{t('measurements')}</Text>
             <InputField
-              label="Mother's Name"
+              label={t('motherName')}
               icon="people-outline"
-              placeholder="Enter mother or guardian name"
+              placeholder={t('enterMotherName')}
               value={form.motherName}
               onChangeText={(value) => update('motherName', value)}
               error={errors.motherName}
+              editable={!isParent}
             />
             <InputField
-              label="Parent Mobile"
+              label={t('parentMobile')}
               icon="call-outline"
-              placeholder="10-digit phone number"
+              placeholder={t('parentMobilePlaceholder')}
               keyboardType="phone-pad"
               value={form.mobile}
               onChangeText={(value) => update('mobile', value)}
               error={errors.mobile}
+              editable={!isParent}
             />
             <View style={styles.measureRow}>
               <View style={styles.measureField}>
                 <InputField
-                  label="Weight (kg)"
+                  label={t('weightKg')}
                   icon="fitness-outline"
-                  placeholder="e.g. 8.5"
+                  placeholder={t('weightPlaceholder')}
                   keyboardType="decimal-pad"
                   value={form.weight}
                   onChangeText={(value) => update('weight', value)}
@@ -198,9 +232,9 @@ export const ChildRegistrationScreen: React.FC<Props> = ({ navigation }) => {
               </View>
               <View style={styles.measureField}>
                 <InputField
-                  label="Height (cm)"
+                  label={t('heightCm')}
                   icon="resize-outline"
-                  placeholder="e.g. 72"
+                  placeholder={t('heightPlaceholder')}
                   keyboardType="decimal-pad"
                   value={form.height}
                   onChangeText={(value) => update('height', value)}
@@ -209,25 +243,27 @@ export const ChildRegistrationScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
             <InputField
-              label="MUAC (mm)"
+              label={t('muacMm')}
               icon="analytics-outline"
-              placeholder="e.g. 112"
+              placeholder={t('muacPlaceholder')}
               keyboardType="numeric"
               value={form.muac}
               onChangeText={(value) => update('muac', value)}
               error={errors.muac}
             />
             <View style={styles.statusRow}>
-              <Text style={styles.statusLabel}>Health Status</Text>
-              <View style={styles.statusBadge}>
-                <Text style={styles.statusBadgeText}>{form.healthStatus}</Text>
+              <Text style={styles.statusLabel}>{t('healthStatus')}</Text>
+              <View style={[styles.statusBadge, { backgroundColor: getStatusColors(form.healthStatus).bg }]}>
+                <Text style={[styles.statusBadgeText, { color: getStatusColors(form.healthStatus).text }]}>
+                  {form.healthStatus === 'SAM' ? t('sam') : form.healthStatus === 'MAM' ? t('mam') : t('healthy')}
+                </Text>
               </View>
             </View>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Location Details</Text>
-            <Text style={styles.pickerLabel}>District</Text>
+            <Text style={styles.sectionTitle}>{t('locationDetails')}</Text>
+            <Text style={styles.pickerLabel}>{t('district')}</Text>
             <View style={styles.statusGrid}>
               {DISTRICTS.map((district) => (
                 <TouchableOpacity
@@ -237,36 +273,36 @@ export const ChildRegistrationScreen: React.FC<Props> = ({ navigation }) => {
                     form.district === district && styles.districtBtnActive,
                   ]}
                   onPress={() => update('district', district)}
+                  disabled={isParent && !!user?.district}
                 >
                   <Text style={[styles.districtText, form.district === district && styles.districtTextActive]}>
-                    {district}
+                    {t(district.toLowerCase())}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
             {errors.district && <Text style={styles.errorText}>{errors.district}</Text>}
             <InputField
-              label="Village / Ward Area"
+              label={t('villageWard')}
               icon="location-outline"
-              placeholder="Enter village or ward area"
+              placeholder={t('enterVillage')}
               value={form.village}
               onChangeText={(value) => update('village', value)}
               error={errors.village}
             />
             <InputField
-              label="Anganwadi Code"
+              label={t('anganwadiCode')}
               icon="business-outline"
-
-              placeholder="Enter Anganwadi code"
+              placeholder={t('enterAnganwadiCode')}
               value={form.anganwadiCode}
               onChangeText={(value) => update('anganwadiCode', value)}
               error={errors.anganwadiCode}
             />
           </View>
 
-          <Button label={loading ? 'Saving...' : 'Submit Registration'} onPress={handleRegister} loading={loading} />
-          <TouchableOpacity style={styles.dismissLink} onPress={() => navigation.goBack()}>
-            <Text style={styles.dismissText}>Cancel registration</Text>
+          <Button label={loading ? t('saving') : t('submitRegistration')} onPress={handleRegister} loading={loading} disabled={loading || registrationSuccess} />
+          <TouchableOpacity style={styles.dismissLink} onPress={() => navigation.goBack()} disabled={loading || registrationSuccess}>
+            <Text style={[styles.dismissText, (loading || registrationSuccess) && { opacity: 0.5 }]}>{t('cancelRegistration')}</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

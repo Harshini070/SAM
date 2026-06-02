@@ -253,6 +253,54 @@ async def get_my_alerts(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
+@router.put("/read-all")
+async def mark_all_alerts_read(current_user: dict = Depends(get_current_user)):
+    """Mark all alerts for current user as read"""
+    try:
+        service = AlertService()
+        success = await service.mark_all_alerts_as_read(current_user.get("phone"))
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to mark all alerts as read")
+        return {"success": True, "message": "All alerts marked as read"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/{alert_id}/read")
+async def mark_alert_read(alert_id: str, current_user: dict = Depends(get_current_user)):
+    """Mark a single alert as read"""
+    try:
+        service = AlertService()
+        success = await service.mark_alert_as_read(alert_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Alert not found or update failed")
+        return {"success": True, "message": "Alert marked as read"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/clear-all")
+async def clear_all_alerts(current_user: dict = Depends(get_current_user)):
+    """Clear all alerts for the current user"""
+    try:
+        service = AlertService()
+        success = await service.clear_all_alerts(current_user.get("phone"))
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to clear alerts")
+        return {"success": True, "message": "All alerts cleared"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/{alert_id}")
+async def delete_alert(alert_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a single alert"""
+    try:
+        service = AlertService()
+        success = await service.delete_alert(alert_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Alert not found or deletion failed")
+        return {"success": True, "message": "Alert deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/by-type/{alert_type}")
 async def get_alerts_by_type(
     alert_type: str,

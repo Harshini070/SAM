@@ -119,6 +119,9 @@ class NRCService:
                 {"$inc": {"occupied_beds": -1}}
             )
         
+        if result:
+            result["_id"] = str(result["_id"])
+            
         return result
 
     async def get_center_occupancy(self, nrc_id: str) -> dict:

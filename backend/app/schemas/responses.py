@@ -25,6 +25,7 @@ class ChildResponse(BaseModel):
     nrc_assigned: Optional[str]
     last_screening_date: Optional[datetime]
     next_followup_date: Optional[datetime]
+    growth_history: Optional[List[dict]] = None
 
 class ScreeningResponse(BaseModel):
     child_id: str

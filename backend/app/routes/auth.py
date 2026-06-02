@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from app.schemas.requests import OTPRequest, OTPVerifyRequest
+from app.schemas.requests import OTPRequest, OTPVerifyRequest, ProfileUpdateRequest
 from app.schemas.responses import TokenResponse
 from app.services.auth_service import AuthService
 from app.middleware.auth import get_current_user
@@ -59,6 +59,19 @@ async def verify_otp(request: OTPVerifyRequest):
             detail=str(e)
         )
 
+@router.get("/test/get-otp")
+async def get_test_otp(phone: str):
+    """Retrieve current OTP for verification testing"""
+    from app.database import get_db
+    db = get_db()
+    otp_doc = await db.otps.find_one({"phone": phone})
+    if not otp_doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="OTP not found"
+        )
+    return {"code": otp_doc["code"]}
+
 @router.get("/me")
 async def get_current_user_info(current_user: dict = Depends(get_current_user)):
     """Get current user information"""
@@ -78,3 +91,26 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
         "district": user.get("district"),
         "is_active": user.get("is_active", True)
     }
+
+@router.put("/profile")
+async def update_profile(
+    request: ProfileUpdateRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update current user's profile information"""
+    service = AuthService()
+    update_data = {k: v for k, v in request.dict().items() if v is not None}
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No valid fields provided for update"
+        )
+    
+    success = await service.update_profile(current_user["phone"], update_data)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update profile"
+        )
+    
+    return {"success": True, "message": "Profile updated successfully"}

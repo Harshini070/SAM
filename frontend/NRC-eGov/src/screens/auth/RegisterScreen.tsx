@@ -9,6 +9,7 @@ import { Colors } from '../../theme/colors';
 import { Spacing, Radius } from '../../theme/spacing';
 import { Typography } from '../../theme/typography';
 import { ROLE_LIST, Role } from '../../constants/roles';
+import { useLanguage } from '../../context/LanguageContext';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Register'>;
@@ -16,20 +17,21 @@ type Props = {
 
 export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const { t, locale } = useLanguage();
   const [role, setRole] = useState<Role | ''>('');
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<{ role?: string; email?: string }>({});
   const [pickerVisible, setPickerVisible] = useState(false);
 
   const handleGoogleRegister = () => {
-    if (!role) return setErrors({ role: 'Please select a professional role' });
-    Alert.alert('Google OAuth', 'Google registration integration will use Expo AuthSession.');
+    if (!role) return setErrors({ role: t('selectRoleError') });
+    Alert.alert(t('gmailRegisterAlertTitle'), t('gmailRegisterAlertMsg'));
   };
 
   const handleMobileRegister = () => {
     const nextErrors: typeof errors = {};
-    if (!role) nextErrors.role = 'Please select a professional role';
-    if (role && role !== 'Parent' && !email.trim()) nextErrors.email = 'Government email is required for non-parent roles';
+    if (!role) nextErrors.role = t('selectRoleError');
+    if (role && role !== 'Parent' && !email.trim()) nextErrors.email = t('govEmailRequired');
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
     navigation.navigate('OTPVerification', {
@@ -40,8 +42,8 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleNormalRegistration = () => {
     const nextErrors: typeof errors = {};
-    if (!role) nextErrors.role = 'Please select a professional role';
-    if (role && role !== 'Parent' && !email.trim()) nextErrors.email = 'Government email is required for non-parent roles';
+    if (!role) nextErrors.role = t('selectRoleError');
+    if (role && role !== 'Parent' && !email.trim()) nextErrors.email = t('govEmailRequired');
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
     navigation.navigate('FullRegistration', {
@@ -51,40 +53,40 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}> 
-      <Text style={styles.title}>Create Account</Text>
-      <Text style={styles.subtitle}>Start your registration</Text>
+      <Text style={styles.title}>{t('createAccount')}</Text>
+      <Text style={styles.subtitle}>{t('startRegistration')}</Text>
 
       <View style={styles.card}>
-        <Text style={styles.cardHeadline}>Welcome to NRC e-Governance</Text>
+        <Text style={styles.cardHeadline}>{t('welcomeNrcGov')}</Text>
         <Text style={styles.cardCopy}>
-          Choose your preferred way to create a secure account and access government services.
+          {t('registerCardCopy')}
         </Text>
 
-        <Text style={styles.pickerLabel}>Professional Role</Text>
+        <Text style={styles.pickerLabel}>{t('professionalRole')}</Text>
         <TouchableOpacity style={[styles.roleSelect, errors.role ? styles.errorBorder : null]} onPress={() => setPickerVisible(true)}>
-          <Text style={[styles.roleSelectText, !role && { color: Colors.textMuted }]}>{role || 'Select role'}</Text>
+          <Text style={[styles.roleSelectText, !role && { color: Colors.textMuted }]}>{role || t('selectRole')}</Text>
         </TouchableOpacity>
         {errors.role ? <Text style={styles.errorText}>{errors.role}</Text> : null}
 
         <InputField
-          label="Government Email (required for non-Parent roles)"
+          label={t('govEmailLabel')}
           icon="mail-outline"
-          placeholder="name@domain.gov.in"
+          placeholder={t('govEmailPlaceholder')}
           value={email}
           onChangeText={(v) => { setEmail(v); if (errors.email) setErrors((p) => ({ ...p, email: undefined })); }}
           keyboardType="email-address"
           error={errors.email}
         />
 
-        <Button label="Register with Gmail" onPress={handleGoogleRegister} style={styles.button} />
-        <Button label="Register with Mobile Number" onPress={handleMobileRegister} variant="outline" style={styles.button} />
-        <Button label="Normal Registration" onPress={handleNormalRegistration} variant="ghost" textStyle={styles.ghostText} style={styles.button} />
+        <Button label={t('registerGmailBtn')} onPress={handleGoogleRegister} style={styles.button} />
+        <Button label={t('registerMobileBtn')} onPress={handleMobileRegister} variant="outline" style={styles.button} />
+        <Button label={t('submitRegistration')} onPress={handleNormalRegistration} variant="ghost" textStyle={styles.ghostText} style={styles.button} />
       </View>
 
       <Modal visible={pickerVisible} transparent animationType="slide">
         <TouchableOpacity style={styles.modalBackdrop} onPress={() => setPickerVisible(false)} />
         <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Select Role</Text>
+          <Text style={styles.modalTitle}>{t('professionalRole')}</Text>
           <FlatList
             data={ROLE_LIST}
             keyExtractor={(item) => item}
@@ -101,7 +103,9 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
       </Modal>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>This portal is managed by the Government of Chhattisgarh and built for trusted public service access.</Text>
+        <Text style={styles.footerText}>
+          {t('govPortalManagedText')}
+        </Text>
       </View>
     </View>
   );
